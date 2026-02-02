@@ -11,3 +11,6 @@ Terminal reaches include reaches that discharge to
 Subset of [[#Terminal Reaches]] that discharge to 
  - coasts
  - large waterbodies
+
+### Headwater Reaches
+Reaches that have no reaches upstream of them in the hydrofabric network.
