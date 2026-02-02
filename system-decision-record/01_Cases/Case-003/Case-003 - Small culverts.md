@@ -15,10 +15,20 @@ stream_orders:
 ---
 ## Description
 
-This case exhibits two distinct issues that may occur when culverts are not adequately breached: [[ISU-005 - Divergent flowpath]] and [[ISU-007 - Culvert blocking flow]].
+This case exhibits two distinct issues that may occur when culverts are not adequately breached: [[ISU-005 - Divergent flowpath]] and [[ISU-007 - Culvert blocking flow]]. 
 
 
 ![[01_Cases/Case-003/FIG-001.png]]
+
+## Experiments
+
+### [[EXP-004 - Run a model using current Decision Register methodology]] on reach 30704
+
+#### Decision Register:   e043d37
+
+Changes:
+- Use known water surface elevation from downstream reach (30683) as downstream boundary condition.
+
 
 In the upstream area, FIM from the 2D model differs from the 100-year FEMA maps.
 
@@ -28,7 +38,6 @@ In the upstream area, FIM from the 2D model differs from the 100-year FEMA maps.
 
 FEMA 100-year floodplain (blue)
 [[01_Cases/Case-003/FIG-001.png]]
-
 ![[FIG-009.png]]
 
 Image of the model DEM in this area
@@ -43,7 +52,6 @@ Further downstream, culverts impound flows. In one case, they prevent water from
 [[FIG-006.png]]
 [[FIG-007.png]]
 [[FIG-008.png]]
-## Experiments
 
 ---
 ## Linked Decisions Summary Table
