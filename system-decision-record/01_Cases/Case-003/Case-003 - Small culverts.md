@@ -13,19 +13,36 @@ tags:
 stream_orders:
   - "1"
 ---
+## Description
+
+This case exhibits two distinct issues that may occur when culverts are not adequately breached: [[ISU-005 - Divergent flowpath]] and [[ISU-007 - Culvert blocking flow]].
+
+
 ![[01_Cases/Case-003/FIG-001.png]]
 
-The upstream area differs from the reference FIM from FEMA.
+In the upstream area, FIM from the 2D model differs from the 100-year FEMA maps.
 
+2D Model
+
+[[01_Cases/Case-003/FIG-002.png]]
+
+FEMA 100-year floodplain (blue)
 [[01_Cases/Case-003/FIG-001.png]]
 
 ![[FIG-009.png]]
 
+Image of the model DEM in this area
+[[01_Cases/Case-003/FIG-003.png]]
 
-## Description
+And a higher-resolution copy from the source USGS terrain
+[[01_Cases/Case-003/FIG-004.png]]
 
-- A small suburban stream crosses an unburned culvert and spills out to the wrong river.
+Further downstream, culverts impound flows. In one case, they prevent water from entering the downstream end of the model.
 
+[[FIG-005.png]]
+[[FIG-006.png]]
+[[FIG-007.png]]
+[[FIG-008.png]]
 ## Experiments
 
 ---
@@ -33,6 +50,6 @@ The upstream area differs from the reference FIM from FEMA.
 
 | Decision                                                                          | Alternative                                                                                          | Outcome | Evidence                                                    |
 | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------- |
-| [[DR-010 - How should DEM data be modified to enforce drainage through culverts]] | [[DR-010 - How should DEM data be modified to enforce drainage through culverts#ALT-A - Do nothing]] | #reject | [[ISU-005 - Unburned Culverts Lead to Incorrect Flow Path]] |
+| [[DR-010 - How should DEM data be modified to enforce drainage through culverts]] | [[DR-010 - How should DEM data be modified to enforce drainage through culverts#ALT-A - Do nothing]] | #reject | [[ISU-005 - Divergent flowpath]] |
 
 
