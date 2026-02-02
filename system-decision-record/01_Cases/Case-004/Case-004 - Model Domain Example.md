@@ -12,20 +12,25 @@ tags:
 stream_orders:
   - "4"
 ---
-![[01_Cases/Case-004/FIG-001.png]]
-Benchmark FIM from FEMA
-![[01_Cases/Case-004/FIG-002.png]]
 ## Description
 
-- A medium sized river has water pooling up against the model edge.
+ - This case examines a situation where the approach of using the reach divide for the model domain led to FIM underestimation.
+
+![[01_Cases/Case-004/FIG-001.png]]
+
+
 
 ## Experiments
+
+### [[EXP-005 - Run a Model with Domain Developed from Reach Divide]] for reach 30728
+Comparison to benchmark FIM from FEMA
+![[01_Cases/Case-004/FIG-002.png]]
 
 ---
 ## Linked Decisions Summary Table
 
 | Decision                                | Alternative                                                            | Outcome | Evidence                                    |
 | --------------------------------------- | ---------------------------------------------------------------------- | ------- | ------------------------------------------- |
-| [[DR-011 - Model Domain Determination]] | [[DR-011 - Model Domain Determination#ALT-A - Buffer on Reach Divide]] | #reject | [[ISU-006 - Improperly-sized model domain]] |
+| [[DR-011 - How should model domain be determined]] | [[DR-011 - How should model domain be determined#ALT-A - Buffer on Reach Divide]] | #reject | [[ISU-006 - FIM cutting off arbitrarily at edges]] |
 
 

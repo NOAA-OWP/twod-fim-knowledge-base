@@ -18,9 +18,10 @@ stream_orders:
 
 - A tributary has water pooling up against the model edge of the mainstem.
 - Hydraulically, this is not an issue, but this case should be considered when developing an automation approach for [[DR-006 - Model Domain Determination]]
-- 
 
 ## Experiments
+
+### [[EXP-005 - Run a Model with Domain Developed from Reach Divide]] for reach 60868
 
 ---
 ## Linked Decisions Summary Table
