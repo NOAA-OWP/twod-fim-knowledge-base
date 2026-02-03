@@ -1,16 +1,12 @@
 ## Description
-In some areas, hydrofabric reaches will be very short relative to their floodplains and in terms of the flow additions between reaches. Should reaches be eclipsed for larger rivers?
+This DR is only relevant for some alternatives in  [[DR-013 - What Should be Geometry and Location of Input  BC]]
 
 ## Alternatives
 
-### ALT-A - No
+### ALT-A - 0.25 of Upstream Reach Length 
 #current
 
-### ALT-B - Yes
-
-
-
-
+### ALT-B - 100 meters
 ## Linked Cases Summary Table
 
 | Alt | Case | Link | Reason |

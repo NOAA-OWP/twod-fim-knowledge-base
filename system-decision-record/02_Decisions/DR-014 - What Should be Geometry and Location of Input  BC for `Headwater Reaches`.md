@@ -3,13 +3,12 @@ Water needs to enter the model domain. What kind of geometry should be used to a
 
 ## Alternatives
 
-### ALT-A - At regular intervals along the flowpath
+### ALT-A - At Perpendicular Line on `Reach Start`
 
+### ALT-A - At Points Distributed Along the Reach
 
-### ALT-B - At a single inflow point at the upstream end of flowpath
+### ALT-C - At a Point on `Reach Start`
 #current
-
-
 ## Linked Cases Summary Table
 
 | Alt | Case | Link | Reason |

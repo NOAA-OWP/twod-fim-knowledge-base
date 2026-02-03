@@ -31,6 +31,6 @@ Comparison to benchmark FIM from FEMA
 
 | Decision                                | Alternative                                                            | Outcome | Evidence                                    |
 | --------------------------------------- | ---------------------------------------------------------------------- | ------- | ------------------------------------------- |
-| [[DR-011 - How should model domain be determined]] | [[DR-011 - How should model domain be determined#ALT-A - Buffer on Reach Divide]] | #reject | [[ISU-006 - FIM cutting off arbitrarily at edges]] |
+| [[DR-011 - How to Determine Initial Model Domain]] | [[DR-011 - How to Determine Initial Model Domain#ALT-A - Buffer on Reach Divide]] | #reject | [[ISU-006 - FIM cutting off arbitrarily at edges]] |
 
 
