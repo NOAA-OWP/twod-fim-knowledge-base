@@ -36,7 +36,7 @@ Two green reaches here are common outlet reaches because they share same `reach 
 #### Connected Reaches 
 Reaches connected to a reach through upstream or downstream relationship.
 
-All blue reaches are `connected reaches` for green reach. Note that red is reach is not.
+All blue reaches are `connected reaches` for green reach. Note that red reach is not.
 ![[00_Project_Overview/FIG-004.png]]
 
 #### Adjacent Reaches
