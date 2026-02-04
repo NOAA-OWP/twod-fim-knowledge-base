@@ -35,6 +35,9 @@ Examining the experiment condition of using a single point at the `reach start`,
 
 ![[01_Cases/Case-006/FIG-002.png]]
 
+The image below shows the depth raster for that same event.
+![[FIG-005.jpeg]]
+
 [[ISU-008 - Water-surface Elevation Anomalies]] - The "bullseye" pattern around the inflow point could lead to model instability and unreliable results.  Furthermore, these water surface elevation artifacts could be visible in the final FIMs.  Given these results, we reject [[DR-013 - What Should be Geometry and Location of Input  BC#ALT-D - At Point Some Distance Away on the `Upstream Mainstem Reach`|DR-013 ALT-D]] and [[DR-013 - What Should be Geometry and Location of Input  BC#ALT-E - A Point at the `Reach Start`|DR-013 ALT-E]].
 
 Examining the experiment of using a 100-meter wide line 25% upstream along the `upstream mainstem`, Some water surface artifacts are present, but they are much less pronounced.  
@@ -46,6 +49,9 @@ These are a mild case of [[ISU-008 - Water-surface Elevation Anomalies]]. In mos
 Examining the experiment of using a 100-meter wide line at the `reach start`, Some water surface artifacts are present.
 
 ![[01_Cases/Case-006/FIG-004.png]]
+
+The image below shows the depth raster for that same event.
+![[FIG-006.jpeg]]
 
 These are a mild case of [[ISU-008 - Water-surface Elevation Anomalies]]. In most cases these may not be problematic, however, if [[DR-004 - Strategy of Pixel Value Calculation For Composite Maps#ALT-D - Pixelwise Max]] is used, the anomaly could be visible in a final FIM.
 
