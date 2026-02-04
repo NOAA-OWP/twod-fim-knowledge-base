@@ -151,12 +151,26 @@ module.exports = class TableAutopaddingRemover extends Plugin {
   onload() {
     this.processing = new Set();
 
-    this.registerEvent(
-      this.app.vault.on("modify", (file) => this.onModify(file))
-    );
+    this.addCommand({
+      id: "normalize-current-file",
+      name: "Normalize tables in current file",
+      checkCallback: (checking) => {
+        const file = this.app.workspace.getActiveFile();
+        if (!file) return false;
+        if (checking) return true;
+        this.normalizeFile(file);
+        return true;
+      },
+    });
+
+    this.addCommand({
+      id: "normalize-all-files",
+      name: "Normalize tables in all markdown files",
+      callback: () => this.normalizeAllFiles(),
+    });
   }
 
-  async onModify(file) {
+  async normalizeFile(file) {
     if (!(file instanceof TFile)) return;
     if (file.extension !== "md") return;
     if (this.processing.has(file.path)) return;
@@ -170,6 +184,15 @@ module.exports = class TableAutopaddingRemover extends Plugin {
       await this.app.vault.modify(file, normalized);
     } finally {
       this.processing.delete(file.path);
+    }
+  }
+
+  async normalizeAllFiles() {
+    const files = this.app.vault.getMarkdownFiles();
+    for (const file of files) {
+      // Sequential to avoid heavy vault churn
+      // eslint-disable-next-line no-await-in-loop
+      await this.normalizeFile(file);
     }
   }
 };
