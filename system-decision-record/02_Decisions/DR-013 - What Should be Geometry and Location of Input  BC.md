@@ -18,15 +18,20 @@ Green reach is being modeled.
 Green reach is being modeled.
 ![[DR-013-FIG-003.png]]
 
-### ALT-D - At Point Some Distance Away on Highest Drainage Area `Upstream Reach`
+### ALT-D - At Point Some Distance Away on the `Upstream Mainstem Reach`
 
 Green reach is being modeled.
 ![[DR-013-FIG-004.png]]
+### ALT-E - A Point at the `Reach Start`
+
+Green reach is being modeled.
+![[02_Decisions/FIG-005.png]]
+
 ## Linked Cases Summary Table
 
 | Alt | Case | Link | Reason |
-| --- | ---- | ---- | ------ |
-|     |      |      |        |
+| --- | --- | --- | --- |
+| | | | |
 
 ## Decision History
 - 2026-02-02: Retroactively document current approach (ALT-A)

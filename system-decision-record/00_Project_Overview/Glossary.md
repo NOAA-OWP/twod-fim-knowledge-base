@@ -10,6 +10,12 @@ Subset of [[#Terminal Reaches]] that discharge to
  - coasts
  - large waterbodies
 
+#### Upstream Reach
+A reach that drain to a reach of interest.
+
+#### Upstream Mainstem Reach
+The reach with the largest drainage area of all `upstream reaches` for a reach of interest.
+
 #### Headwater Reaches
 Reaches that have no reaches upstream of them in the reach network.
 
