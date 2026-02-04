@@ -14,13 +14,13 @@ The domain should be expanded until there are no flooding cells on the edges oth
 ### ALT-B - Informed by Elevation
 #current
 
-The domain should be expanded until there are no flooding cells on the edges other than cells that have elevation
- - lower than the WSEL at the  `outlet point` of the reach  
+The domain should be expanded until there are no flooding cells on the edges other than cells that have elevation lower than the elevation at the  `outlet point` of the reach.
+
 
 ## Linked Cases Summary Table
 
 | Alt | Case | Link | Reason |
 | --- | ---- | ---- | ------ |
-|     |      |      |        |
+| | | | |
 
 ## Decision History
