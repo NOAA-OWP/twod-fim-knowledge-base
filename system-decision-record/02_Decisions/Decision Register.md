@@ -13,8 +13,8 @@ Status meanings:
 - Superseded: Decision replaced by another DR.
 
 | Decision | Current Alternative | Status | Notes |
-| ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ----- |
-| [[DR-001 - Should KWSE Scenario be Modeled or Not]] | [[DR-001 - Should KWSE Scenario be Modeled or Not#ALT-A - For All Reaches\|ALT-A - For All Reaches]] | Alternate Selected 3 | |
+| --- | --- | --- | --- |
+| [[DR-001 - Should KWSE Scenario be Modeled or Not]] | [[DR-001 - Should KWSE Scenario be Modeled or Not#ALT-A - For All Reaches\|ALT-A - For All Reaches]] | Alternate Selected | |
 | | | | |
 | [[DR-002 - What is the Definition of Benchmark FIM for Model Connectivity Testing]] | [[DR-002 - What is the Definition of Benchmark FIM for Model Connectivity Testing#ALT-A - Custom 2D Model\|ALT-A - Custom 2D Model]] | Alternate Selected | |
 | | | | |

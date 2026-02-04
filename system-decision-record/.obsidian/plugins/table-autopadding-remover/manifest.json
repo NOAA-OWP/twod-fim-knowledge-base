@@ -1,0 +1,10 @@
+{
+  "id": "table-autopadding-remover",
+  "name": "Table Autopadding Remover",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Removes extra padding spaces in Markdown tables on save.",
+  "author": "Local",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}

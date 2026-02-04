@@ -1,0 +1,175 @@
+const { Plugin, TFile } = require("obsidian");
+
+function isFenceLine(trimmed) {
+  return trimmed.startsWith("```") || trimmed.startsWith("~~~");
+}
+
+function countBackticks(line, start) {
+  let count = 0;
+  while (start + count < line.length && line[start + count] === "`") {
+    count++;
+  }
+  return count;
+}
+
+function splitByPipes(line) {
+  const cells = [];
+  let current = "";
+  let i = 0;
+  let inWikilink = false;
+  let inCode = false;
+  let codeTicks = 0;
+
+  while (i < line.length) {
+    const ch = line[i];
+    const next = i + 1 < line.length ? line[i + 1] : "";
+
+    if (!inCode && !inWikilink && ch === "\\" && next === "|") {
+      current += "\\|";
+      i += 2;
+      continue;
+    }
+
+    if (!inCode && ch === "[" && next === "[") {
+      inWikilink = true;
+      current += "[[";
+      i += 2;
+      continue;
+    }
+
+    if (inWikilink && ch === "]" && next === "]") {
+      inWikilink = false;
+      current += "]]";
+      i += 2;
+      continue;
+    }
+
+    if (!inWikilink && ch === "`") {
+      const ticks = countBackticks(line, i);
+      current += "`".repeat(ticks);
+      i += ticks;
+      if (!inCode) {
+        inCode = true;
+        codeTicks = ticks;
+      } else if (ticks === codeTicks) {
+        inCode = false;
+        codeTicks = 0;
+      }
+      continue;
+    }
+
+    if (!inCode && !inWikilink && ch === "|") {
+      cells.push(current);
+      current = "";
+      i++;
+      continue;
+    }
+
+    current += ch;
+    i++;
+  }
+
+  cells.push(current);
+  return cells;
+}
+
+function formatCell(text) {
+  if (text.length === 0) return " ";
+  return ` ${text} `;
+}
+
+function isSeparatorCell(text) {
+  return /^:?-{3,}:?$/.test(text);
+}
+
+function normalizeSeparatorCell(text) {
+  const trimmed = text.trim();
+  const left = trimmed.startsWith(":");
+  const right = trimmed.endsWith(":");
+  if (left && right) return ":---:";
+  if (left) return ":---";
+  if (right) return "---:";
+  return "---";
+}
+
+function normalizeTableLine(line) {
+  const prefixMatch = line.match(/^(\s*(?:>+\s*)*)/);
+  const prefix = prefixMatch ? prefixMatch[1] : "";
+  const content = line.slice(prefix.length);
+  const trimmed = content.trim();
+
+  if (!trimmed.includes("|")) return line;
+  if (!(trimmed.startsWith("|") && trimmed.endsWith("|"))) return line;
+
+  const rawCells = splitByPipes(trimmed);
+  if (rawCells.length < 3) return line;
+
+  let cells = rawCells;
+  cells = cells.slice(1, cells.length - 1);
+  const normalizedCells = cells.map((cell) => cell.trim());
+  const isSeparatorRow = normalizedCells.every(isSeparatorCell);
+  const finalCells = isSeparatorRow
+    ? normalizedCells.map(normalizeSeparatorCell)
+    : normalizedCells;
+  const normalized = `${prefix}|${finalCells.map(formatCell).join("|")}|`;
+
+  return normalized;
+}
+
+function normalizeTables(text) {
+  const lines = text.split(/\r?\n/);
+  const result = [];
+  let inFence = false;
+  let fenceMarker = "";
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (isFenceLine(trimmed)) {
+      if (!inFence) {
+        inFence = true;
+        fenceMarker = trimmed.startsWith("```") ? "```" : "~~~";
+      } else if (trimmed.startsWith(fenceMarker)) {
+        inFence = false;
+        fenceMarker = "";
+      }
+      result.push(line);
+      continue;
+    }
+
+    if (inFence) {
+      result.push(line);
+      continue;
+    }
+
+    result.push(normalizeTableLine(line));
+  }
+
+  return result.join("\n");
+}
+
+module.exports = class TableAutopaddingRemover extends Plugin {
+  onload() {
+    this.processing = new Set();
+
+    this.registerEvent(
+      this.app.vault.on("modify", (file) => this.onModify(file))
+    );
+  }
+
+  async onModify(file) {
+    if (!(file instanceof TFile)) return;
+    if (file.extension !== "md") return;
+    if (this.processing.has(file.path)) return;
+
+    const text = await this.app.vault.read(file);
+    const normalized = normalizeTables(text);
+    if (normalized === text) return;
+
+    this.processing.add(file.path);
+    try {
+      await this.app.vault.modify(file, normalized);
+    } finally {
+      this.processing.delete(file.path);
+    }
+  }
+};
