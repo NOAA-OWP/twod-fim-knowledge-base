@@ -8,7 +8,8 @@ What should be the strategy to create composite map, what pixel value should a c
 ### ALT-B - Upstream Maps at Bottom, Downstream at Top 
 
 
-### ALT-C - Maps Clipped. Same Level Maps at No Particular Order
+### ALT-C - Maps Clipped. `Common Outlet Reaches` Maps at No Particular Order
+
 
 ### ALT-D - Pixelwise Max
 #current 
@@ -17,8 +18,8 @@ What should be the strategy to create composite map, what pixel value should a c
 ---
 ## Linked Cases Summary Table
 
-| Alt | Case                                                                   | Link    | Reason                                                |
-| --- | ---------------------------------------------------------------------- | ------- | ----------------------------------------------------- |
+| Alt | Case | Link | Reason |
+| --- | --- | --- | --- |
 
 
 ## Decision History
