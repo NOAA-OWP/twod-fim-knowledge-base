@@ -1,79 +1,96 @@
-# Methodology Report: Automated 2D Reach-Based FIM Libraries (Pilot Phase)
+# Methodology Report: Automated 2D Hydrodynamic Reach-Based FIM Libraries for Operational Flood Forecasting
 
 ## Executive Summary
-This report presents a pilot‑informed methodology for producing nationwide 2D flood inundation map (FIM) libraries using reach‑based hydrodynamic modeling. The approach preserves the core operational pattern of Ripple1D—pre‑generated per‑reach libraries assembled downstream‑to‑upstream with flows2fim—while replacing 1D/GIS‑based assumptions with 2D physics where feasible. Our work to date has focused on developing a “loose” methodology that can be automated, identifying decisions that materially affect outcomes, and recording evidence for those decisions through an SDR process.
+This report presents a pilot‑informed methodology for producing nationwide 2D flood inundation map (FIM) libraries using reach‑based hydrodynamic modeling to move beyond the GIS‑based Height Above Nearest Drainage (HAND) approach. The approach preserves the Flows2FIM operational pattern of pre‑generated per‑reach libraries that can be assembled in near real time. Unlike Ripple1D, the reach‑level 2D models are built from scratch through an automated pipeline rather than repurposed from existing studies.
 
-Key outcomes to date indicate that a reach‑based 2D library approach is feasible and integrates directly with existing flows2fim mosaicking workflows. Stage transfer (downstream WSEL) is required at confluences and other backwater‑sensitive settings because normal‑depth‑only boundaries underpredict WSEL. Domain and stage‑transfer geometry must extend beyond hydrofabric divides in wide floodplains, and coarse modeling helps place transfer lines in large rivers. DEM conditioning around culverts and structures is critical to avoid divergent flow paths and impoundment artifacts. Lake and coastal reaches require non‑standard handling, where GIS‑based or waterbody‑stage approaches are more appropriate.
+Our work to date has focused on developing a “loose” methodology that can be automated, identifying decisions that materially affect outcomes, and recording evidence for those decisions through a system decision record (SDR) process.
 
-This report documents the conceptual framework, the evidence‑driven methodology evolution, a proposed automation workflow, known limitations, and a unified appendix of pilot and SDR cases. Once approved, the methodology will be refined and implemented in a prototype area before scaling.
+(to do: redo this section after Key Decision section is updated) Key outcomes to date indicate that a reach‑based 2D library approach is feasible and integrates directly with existing Flows2FIM mosaicking workflows. Downstream stage transfer is required at confluences and other backwater‑sensitive settings because normal‑depth‑only boundaries underpredict water‑surface elevations (WSEL). Domain and stage‑transfer geometry must extend beyond hydrofabric divides in wide floodplains, and coarse modeling helps place transfer lines in large rivers. DEM conditioning around culverts and structures is critical to avoid divergent flow paths and impoundment artifacts. Lake and coastal reaches require non‑standard handling, where GIS‑based or waterbody‑stage approaches are more appropriate.
+
+This report documents the conceptual framework, the evidence‑driven methodology evolution, a proposed automation workflow, known limitations, and a unified appendix of test cases. Once approved, the methodology will be refined and implemented in a prototype area before scaling.
 
 ## Introduction
-OWP currently produces national flood inundation maps using HAND‑based GIS methods and, where available, Ripple1D libraries. These approaches provide broad coverage and operational reliability, but they have known limits in physical accuracy, reproducibility, and the ability to adapt across diverse hydraulic settings. Recent advances in GPU/HPC compute, cloud parallelization, and modern 2D hydrodynamic solvers make it plausible to scale 2D modeling beyond bespoke studies and into a national library‑based system.
+OWP currently produces nationwide flood inundation maps using HAND (Height Above Nearest Drainage) method and, where available, HEC‑RAS 1D based libraries from Ripple1D (NGWPC, n.d.-a). These approaches provide broad coverage and operational reliability, but they have known limits in physical accuracy, reproducibility, and the ability to adapt across diverse hydraulic settings. Recent advances in GPU/HPC compute, cloud parallelization, and modern 2D hydrodynamic solvers make it feasible to apply 2D modeling beyond local studies and into a national library‑based system.
 
-HAND‑style approaches are computationally efficient, but they do not capture backwater effects, structure‑influenced hydraulics, or the cross‑sectional detail embedded in engineered models. This gap motivates the shift to hydrodynamic modeling while retaining an operational workflow that can deliver maps quickly.
+Bathtub or level‑pool methods such as HAND treat flooding as a static surface and do not represent flow routing, backwater, or structure‑influenced hydraulics. These methods can produce large biases in inundation area (e.g., >200% error) and recent work calls for avoiding them in decision‑relevant flood‑management practice (Sanders et al., 2024). Recent incorporation of Ripple1D libraries improves physical realism by leveraging 1D hydraulic models and cross‑sectional data from existing studies, but reliance on **prebuilt legacy models** brings their irregularities such as sparse and discontinuous coverage, inconsistent development methodologies, terrain/data mismatches, and outdated inputs (i.e., unknown or superseded data sources) into OWP's operational flood inundation mapping. As a result, Ripple1D can improve local fidelity but adds complexity and coverage gaps.
 
-This work builds directly on the Ripple1D concept: pre‑generate per‑reach FIM libraries and mosaic them downstream‑to‑upstream using flows2fim and forecast discharges. The difference is the engine—2D hydrodynamics rather than 1D or GIS approximations—and the resulting need for additional automation around domains, boundary conditions, stage transfer lines, and special cases. The report lays out a pilot‑informed methodology that is intentionally loose: it captures what we know works, flags what is unresolved, and documents evidence for key decisions. Once approved, this methodology will be refined and implemented in a prototype area before scaling further.
+This report proposes a 2D hydrodynamic reach‑based library approach to address these gaps. The approach builds reach‑level models from scratch through an automated pipeline while preserving the Ripple1D and Flows2FIM operational pattern: pre‑generate per‑reach FIM libraries and mosaic them downstream‑to‑upstream in near real time using nowcast or forecast discharges (NGWPC, n.d.-a, n.d.-b). The key difference is how the libraries are derived—the computational engine is 2D hydrodynamics rather than 1D, and model construction is automated rather than repurposed from legacy studies (See Fig. 1 for visual explanation). Because 2D modeling is computationally intensive, the workflow shifts heavy computation to pre‑processing so forecast‑time assembly is a lightweight selection‑and‑mosaic step rather than a new simulation. 
 
-By shifting heavy computation to pre‑processing, the library approach enables near real‑time map generation during operations. Forecast‑time assembly is reduced to selection and mosaicking rather than new hydraulic simulation, which is critical for latency and scalability.
+This report lays out a pilot‑informed, initial, automatable methodology and explains how it was developed, where the most consequential decisions sit, and where uncertainty remains. It documents those decisions and open questions through System Decision Records (SDR), and defines the conceptual framework, automation logic, and operational interfaces needed to implement the approach. Once approved, the methodology will be refined and tested in a prototype area before scaling further.
 
-At continental scale, this library‑based approach reflects a necessary operational tradeoff: pre‑compute hydraulics offline, then **look up and composite** reach‑level products during forecasting rather than running new simulations on‑demand. This paradigm preserves backwater physics while keeping forecast‑time latency tractable, and it is the operational foundation we are extending to 2D hydrodynamics.
+The intent of the work described in this report is to assess implementation readiness for 2D reach‑based FIM libraries and to sharpen methodological clarity. The work does not deliver a final production automation workflow; instead, it establishes the foundation for that. The scope therefore focuses on describing the workflow, documenting decision evidence, and identifying where specialized handling or additional validation is required before national‑scale production.
 
 ![Reach-based hydrodynamic modeling for the National Water Model using 1D and 2D approaches](methodology-report/image1.png)
-*Figure TBD. Reach-based hydrodynamic modeling for the National Water Model using 1D and 2D approaches.*
+*Figure 1. Reach‑based hydrodynamic modeling for the National Water Model river network using Ripple1D and 2D approaches. Ripple1D relies on existing 1D models and conflates their cross sections onto target reaches to build reach‑based models. The new 2D methodology does not rely on existing models; it creates a new 2D model for each reach domain, illustrated by the different colored grids in the rightmost panel.*
 
-### Related Work and Context
+## Related Work and Context
 This project sits at the intersection of three mature research threads: **library‑based inundation mapping**, **large‑scale 2D hydrodynamics**, and **automated model setup**. The literature below provides the closest precedents and highlights where our approach diverges.
 
-**Library‑based inundation mapping (operational precedents).** The USGS Flood Inundation Mapping (FIM) program defines a **map library** as a set of inundation maps at discrete stages, linked to gages and used operationally for preparedness and response. The USGS process emphasizes repeatable model construction, calibration, and library publication for real‑time use, which is conceptually aligned with our library‑first paradigm (even though it is local and not reach‑based at national scale). This is a strong institutional precedent for the idea that *precomputed libraries + real‑time lookup* can be operationally reliable (USGS FIM Program; USGS FIM Science).  
+### Library‑based inundation mapping (operational precedents)
+The USGS Flood Inundation Mapping (FIM) program defines a **map library** as a set of inundation maps at discrete stages, linked to gages and used operationally for preparedness and response. The USGS process emphasizes repeatable model construction, calibration, and library publication for real‑time use, which is conceptually aligned with our library‑first paradigm (even though it is local and not reach‑based at national scale). This is a strong institutional precedent for the idea that *precomputed libraries + real‑time lookup* can be operationally reliable (U.S. Geological Survey, n.d.-a, n.d.-b).  
 
-**Continental‑scale 2D forecasting with precomputed libraries (closest analogue).** The Hurricane Harvey study by Wing et al. (2019, *Journal of Hydrology X*) is the closest direct analogue. The authors coupled **Fathom‑US** (a continental‑scale 2D model based on LISFLOOD‑FP) to NOAA forecasts of streamflow, rainfall, and coastal surge. For Harvey, **fluvial inundation was extracted from an existing US‑wide simulation library**, while pluvial and coastal components were simulated for the event. The study produced medium‑term (2–15 day) forecasts and hindcasts, with reported skill around CSI ≈ 0.66 for maximum extent and mean water‑surface error on the order of ~1 m against USGS benchmarks. This work demonstrates that a national 2D library can be operationally coupled to forecasts without crippling lead times. Our approach differs by (1) making the library **reach‑based**, (2) emphasizing **downstream stage transfer** between connected reaches, and (3) treating library construction as a per‑reach automation problem rather than a single continental model run.
+### Continental‑scale 2D forecasting with precomputed libraries (closest analogue)
+The Hurricane Harvey study by Wing et al. (2019) is the closest direct analogue. The authors coupled **Fathom‑US** (a continental‑scale 2D model based on LISFLOOD‑FP) to NOAA forecasts of streamflow, rainfall, and coastal surge. For Harvey, **fluvial inundation was extracted from an existing US‑wide simulation library**, while pluvial and coastal components were simulated for the event. The study produced medium‑term (2–15 day) forecasts and hindcasts, with reported skill around CSI ≈ 0.66 for maximum extent and mean water‑surface error on the order of ~1 m against USGS benchmarks. This work demonstrates that a national 2D library can be operationally coupled to forecasts without crippling lead times. Our approach differs by (1) making the library **reach‑based** (outputs are organized and indexed per reach), (2) emphasizing **downstream stage transfer** between connected reaches, (3) treating library construction as a **per‑reach automation workflow** rather than a single continental model build, and (4) indexing libraries by a **discharge × downstream‑WSEL matrix** rather than return‑period flow bins.
+### Global and regional return‑period libraries (library at scale, but not reach‑based)
+The Copernicus CEMS/GloFAS global river flood hazard maps provide **precomputed inundation depth layers** for multiple return periods (10–500 years). They are derived from LISFLOOD river flows and LISFLOOD‑FP inundation simulations, and are intended for exposure assessment and impact‑based forecasting. These maps are explicitly designed as **global library products** and are used operationally for rapid mapping. However, they are **return‑period‑binned** and network‑linked rather than reach‑specific with downstream stage transfer. This demonstrates feasibility of large‑scale library generation and operational linkage to hydrologic forecasts, while also highlighting the gap our reach‑based approach addresses (Baugh et al., 2024).
 
-**Global and regional return‑period libraries (library at scale, but not reach‑based).** The Copernicus CEMS/GloFAS global river flood hazard maps provide **precomputed inundation depth layers** for multiple return periods (10–500 years). They are derived from LISFLOOD river flows and LISFLOOD‑FP inundation simulations, and are intended for exposure assessment and impact‑based forecasting. These maps are explicitly designed as **global library products** and are used operationally for rapid mapping. However, they are **return‑period‑binned** and network‑linked rather than reach‑specific with downstream stage transfer. This demonstrates feasibility of large‑scale library generation and operational linkage to hydrologic forecasts, while also highlighting the gap our reach‑based approach addresses.
+### Automated 2D model setup frameworks
+HydroMT provides a reproducible, data‑driven framework for building hydrologic and hydrodynamic models at scale. Its ecosystem (including HydroMT‑SFINCS) has been used to automate **globally applicable compound‑flood modeling** from global datasets, with boundary conditions coupled to upstream hydrology and coastal surge/tide models. The NHESS compound‑flood framework demonstrates automated, large‑scale 2D setup and transparent, repeatable preprocessing at global scales (Eilander et al., 2023a, 2023b). These efforts are the closest open‑source automation precedents, though they target event‑based simulations rather than reach‑based library construction with stage transfer between connected reaches.
 
-**Automated 2D model setup frameworks.** HydroMT provides a reproducible, data‑driven framework for building hydrologic and hydrodynamic models at scale. Its ecosystem (including HydroMT‑SFINCS) has been used to automate **globally applicable compound‑flood modeling** from global datasets, with boundary conditions coupled to upstream hydrology and coastal surge/tide models. The NHESS compound‑flood framework demonstrates automated, large‑scale 2D setup and transparent, repeatable preprocessing at global scales. These efforts are the closest open‑source automation precedents, though they target event‑based simulations rather than reach‑based library construction with stage transfer between connected reaches.
+### Foundational 2D floodplain modeling lineage
+The raster‑based formulation in Bates and De Roo (2000) introduced a simplified yet dynamic representation using a 1D kinematic wave for channel flow coupled to a 2D diffusion‑wave floodplain. This formulation underpins many modern large‑scale flood models, including LISFLOOD‑FP. The paper provides the methodological lineage for efficient raster‑based modeling at scale and is the technical foundation behind many of the large‑domain models discussed above.
 
-**Reach‑integrated hybrid approaches (large‑scale speed).** Recent work in GMD proposes **reach‑integrated** methods that blend geomorphic information (HAND) with simplified hydraulics (a steady‑state 1D model), enabling real‑time inundation mapping at very low computational cost. Reported speedups can be orders of magnitude (e.g., ~10,000× faster in one case study), and the framework is designed to accommodate hydraulic structures and energy losses beyond pure HAND. These methods offer a complementary approach where full 2D physics may be impractical, but they do not provide the same level of hydrodynamic detail or boundary‑condition fidelity as a 2D library with explicit downstream stage transfer.
+---
 
-**Foundational 2D floodplain modeling lineage.** The raster‑based formulation in Bates & De Roo (2000, *Journal of Hydrology*) introduced a simplified yet dynamic representation using a 1D kinematic wave for channel flow coupled to a 2D diffusion‑wave floodplain. This formulation underpins many modern large‑scale flood models, including LISFLOOD‑FP. The paper provides the methodological lineage for efficient raster‑based modeling at scale and is the technical foundation behind many of the large‑domain models discussed above.
-
-**Selected references (with links).**
-1. USGS Flood Inundation Mapping (FIM) Program: https://www.usgs.gov/mission-areas/water-resources/science/flood-inundation-mapping-fim-program  
-2. USGS FIM Science (map library definition): https://www.usgs.gov/mission-areas/water-resources/science/flood-inundation-mapping-science  
-3. Wing, O. E. J. et al. (2019). *A flood inundation forecast of Hurricane Harvey using a continental‑scale 2D hydrodynamic model.* Journal of Hydrology X, 4, 100039. https://doi.org/10.1016/j.hydroa.2019.100039  
-4. JRC CEMS/GloFAS Global River Flood Hazard Maps (v2.1): https://developers.google.com/earth-engine/datasets/catalog/JRC_CEMS_GLOFAS_FloodHazard_v2_1  
-5. Eilander, D. et al. (2023). *HydroMT: Automated and reproducible model building and analysis.* JOSS, 8(83), 4897. https://doi.org/10.21105/joss.04897  
-6. Eilander, D. et al. (2023). *A globally applicable framework for compound flood hazard modeling.* NHESS, 23, 823–. https://nhess.copernicus.org/articles/23/823/2023/  
-7. Chlumsky, R. et al. (2025). *A reach‑integrated hydraulic modelling approach for large‑scale and real‑time inundation mapping.* GMD, 18, 3387–3403. https://doi.org/10.5194/gmd-18-3387-2025  
-8. Bates, P. D. & De Roo, A. P. J. (2000). *A simple raster‑based model for flood inundation simulation.* Journal of Hydrology, 236, 54–77. https://doi.org/10.1016/S0022-1694(00)00278-X  
-
-Taken together, prior work demonstrates the feasibility of **precomputed libraries**, **large‑scale 2D simulation**, and **automated model setup**, but the specific synthesis of **reach‑based 2D modeling with downstream stage transfer and flows2fim‑compatible libraries** is not yet well represented in the literature and is the central contribution of this methodology.
+Taken together, prior work demonstrates the feasibility of **precomputed libraries**, **large‑scale 2D simulation**, and **automated model setup**, but the specific synthesis of **reach‑based 2D modeling with downstream stage transfer and Flows2FIM‑compatible libraries** is not yet well represented in the literature and is the central contribution of this methodology.
 
 ## Conceptual Modeling Framework
-The conceptual framework mirrors the Ripple1D library approach, but uses 2D hydrodynamic models per reach. At a high level, the workflow is:
+This section describes the conceptual modeling framework for segmented, reach‑based 2D FIM libraries that, when assembled, approximate a continuous network‑scale model. The framework provides the bedrock for the remaining work.
+
+As touched upon in earlier sections, the framework mirrors the Ripple1D library approach but uses 2D hydrodynamic models per reach. At a high level, the workflow is:
 
 1. Build an individual 2D model for each reach using the NWM hydrofabric.
 2. Apply boundary conditions for each model run using a discharge range at the upstream boundary and a downstream stage derived from the downstream reach simulation.
-3. Simulate combinations of discharge and downstream stage to build a per-reach FIM library.
-4. Mosaic per-reach FIMs downstream-to-upstream using flows2fim to match both at-reach discharge and downstream stage within a defined tolerance.
+3. Simulate combinations of discharge and downstream stage to build a per reach FIM library.
+4. Mosaic per reach FIMs downstream to upstream using Flows2FIM to match both at reach discharge and downstream stage within a defined tolerance.
 
-Each reach model consists of a rectangular domain, an inflow boundary, a stage transfer line (STL), and an outflow boundary. The downstream reach acts as the donor and the upstream reach as the receiver; a water-surface tie-in is enforced at the receiver STL to propagate backwater effects. In the “simple case,” this structure covers most reaches. Special cases such as lake/coastal reaches, large floodplains, or hydraulically coupled reaches require modifications described later in this report.
+The framework assumes that, for riverine (fluvial) flooding, the response to streamflow is largely confined to the local reach. Under that assumption, a sufficiently dense library spanning range of upstream flows and downstream stage conditions should yield a close enough FIM for most expected NWM forecast scenarios without requiring forecast event specific simulations.
+
+Each library entry is treated as quasi‑steady for a given discharge and downstream stage. In practice, this means the maps represent steady snapshots of inundation rather than the full time evolution of a flood wave, which aligns with the library‑lookup paradigm.
+
+The framework is focused on fluvial flooding, where reach‑scale hydraulics dominate and boundary conditions can be represented by discharge and downstream stage. Lake and coastal settings are only touched in the context of boundary‑condition handling for specific reaches; full treatment of those domains and other non‑fluvial processes is outside the current scope.
+
+Under this framework, each reach model consists of a rectangular domain, an inflow boundary, a stage transfer line (STL), and an outflow boundary. The downstream reach water‑surface elevation (WSEL) provides downstream boundary condition to the upstream reach at the STL, enforcing a water‑surface tie‑in to propagate backwater effects. In the “simple case” this structure covers most reaches. Special cases such as lake/coastal reaches, large floodplains, or hydraulically coupled reaches require modifications described later in this report.
 
 ![Example geometry for a single reach-based model showing inflow, outflow, and stage transfer lines](methodology-report/image2.png)
-*Figure TBD. Example geometry for a single reach-based model showing inflow, outflow, and stage transfer lines.*
+*Figure 2. Example geometry for a single reach-based model showing inflow, outflow, and stage transfer lines.*
 
-Operationally, this library framework relies on a simple three‑input architecture that mirrors flows2fim: (1) **pre‑computed FIM libraries** indexed by reach, discharge, and downstream stage; (2) a **rating‑curve database** that maps discharge to downstream water‑surface elevations; and (3) a **controls table** that specifies which flow and boundary condition to use per reach in a given forecast cycle. This separation keeps heavy computation offline and makes operational assembly lightweight.
+Operationally, this library framework relies on a simple architecture that mirrors Flows2FIM: (1) **pre‑computed FIM libraries** of rasters indexed by reach, discharge, and downstream stage; (2) a **rating‑curve database** that relates discharge and downstream WSEL to the library indices; and 
+
+During operations, Flows2FIM assembles these maps by traversing the river network downstream‑to‑upstream and selecting the closest library entry for each reach based on discharge and downstream conditions. This is a lightweight extraction and mosaicking step that runs in seconds without new hydraulic modeling. The separation keeps heavy computation offline and makes operational assembly tractable.
 
 ![Overview of discretizing a river system into reach-based 2D hydrodynamic models](methodology-report/image3.png)
-*Figure TBD. Overview of discretizing a river system into reach-based 2D hydrodynamic models.*
+*Figure 3. Overview of discretizing a river system into reach based 2D hydrodynamic models. The outer images show development of individual models and their geometries; the central image depicts how these models come together to form a mosaicked FIM for the full network.*
+
+
+Figure 4 and 5 show how pre‑generated libraries are used to generate FIMs for diverse flow scenarios.
 
 ![Example composite FIM for a low-magnitude flood along all reaches](methodology-report/image4.png)
-*Figure TBD. Example composite FIM for a low‑magnitude flood along all reaches.*
+*Figure 4. Example composite FIM for a low‑magnitude flood along all reaches.*
 
 ![Example composite FIM for high-magnitude mainstem and low-magnitude tributary conditions](methodology-report/image5.png)
-*Figure TBD. Example composite FIM for a high‑magnitude event along the mainstem and a low‑magnitude event along a tributary.*
+*Figure 5. Example composite FIM for a high‑magnitude event along the mainstem and a low‑magnitude event along a tributary.*
+
+The framework is intentionally implementation agnostic; any hydraulic model or automation tooling can be used to generate individual FIMs as long as the outputs adhere to the library interface described above.
+
+The framework is also flexible about internal model details. For example, DEM conditioning or sub‑grid parameterization can be applied within an individual reach model without changing how the broader system functions. This creates a path for regional experts (e.g., RFCs) to improve reach models in their areas while remaining interoperable with the national library. Realizing this at scale will require governance, QA/QC, and cloud‑infrastructure design, which is beyond the scope of the current work.
 
 ## Methodology Development
-We began with the expectation that automated creation of 2D models with information transfer between connected reaches would require many interdependent decisions. Our initial methodology was intentionally loose, focused on producing workable models quickly so we could observe failures and iterate. As pilot work progressed, we encountered cyclic decision-making where one choice would improve one case but worsen another. To break that cycle, we implemented SDR and documented each decision with evidence, enabling us to converge on a defensible methodology while retaining alternatives for future refinement.
+We began with the expectation that automated creation of 2D models with information transfer between connected reaches would require many interdependent decisions. Several brain storming meetings were held and some testing was also performed across deifferent components that would be required to built together a comprehensive approach.
+
+Our initial methodology was intentionally loose, focused on producing workable models quickly so we could observe failures and iterate. As pilot work progressed, we encountered cyclic decision-making where one choice would improve one case but worsen another. To break that cycle, we implemented SDR (described later in this section) and documented each decision with evidence, enabling us to converge on a defensible methodology while retaining alternatives for future refinement.
+
+
 
 The sections below describe the current methodology inputs and tools, followed by a narrative of how key decisions evolved.
 
@@ -140,7 +157,7 @@ Pilot work used a lightweight automated tool to generate model domains, boundary
 “From an automation standpoint, 2D modeling avoids a major 1D bottleneck: the placement and refinement of cross‑sections at hydraulically significant locations. HEC‑RAS guidance makes clear that cross‑sections must be positioned near structures, slope changes, and junctions—decisions that remain judgment‑intensive even when terrain‑extraction tools are used. In contrast, 2D setup replaces cross‑section placement with repeatable grid and domain rules, which are more amenable to automation. That said, the automation burden does not disappear; it shifts to grid resolution, domain extent, boundary condition placement, and DEM conditioning.” (hec.usace.army.mil)
 
 
-For 2D, there is published evidence of automated model setup at scale (e.g., HydroMT‑SFINCS global setup in NHESS), which supports the idea that 2D automation can be more straightforward in geometry definition—but it shifts effort to grid definition, domain trimming, boundary conditions, and data conditioning. (nhess.copernicus.org)
+For 2D, there is published evidence of automated model setup at scale (e.g., HydroMT‑SFINCS global setup in NHESS), which supports the idea that 2D automation can be more straightforward in geometry definition—but it shifts effort to grid definition, domain trimming, boundary conditions, and data conditioning (Eilander et al., 2023b).
 
 ![Pilot tooling landing page / workflow overview](methodology-report/image7.png)
 *Figure TBD. Pilot tooling used to automate model construction and review.*
@@ -167,7 +184,7 @@ We began with a simple, pragmatic approach: model each reach in isolation, apply
 **Do we need downstream stage transfer (KWSE), or can we rely on normal depth?**
 Our early tests compared runs that used only normal-depth boundaries at the downstream end against runs that used stage transfer from the downstream model. In a confluence with stream-order mismatch, the normal-depth runs produced lower water surface elevations near the downstream tie-in and underrepresented backwater. Stage transfer produced a closer tie-in and more realistic flood extents upstream. Based on this, we currently apply downstream stage transfer for all reaches, including confluences and mainstem-tributary interactions.
 
-This approach aligns with the flows2fim operational algorithm, which traverses the NWM network downstream‑to‑upstream and propagates downstream WSELs as boundary conditions. Preserving this sequential propagation is essential for backwater‑sensitive settings and is a core requirement for interoperability with the library‑based workflow.
+This approach aligns with the Flows2FIM operational algorithm, which traverses the NWM network downstream‑to‑upstream and propagates downstream WSELs as boundary conditions. Preserving this sequential propagation is essential for backwater‑sensitive settings and is a core requirement for interoperability with the library‑based workflow.
 
 Operationally, this implies a two‑pass strategy similar to Ripple1D: normal‑depth runs can be used to establish rating curves and baseline conditions, followed by KWSE‑informed runs to produce the depth grids used in the library. That separation keeps the lookup logic consistent while ensuring downstream boundary conditions are explicitly represented in the final maps.
 
@@ -257,7 +274,7 @@ Simulation files are generated automatically for each discharge and downstream s
 
 
 ### Data Model
-From an operational standpoint, the library structure should remain consistent with flows2fim conventions: a directory per reach, subdirectories per downstream stage (WSE) level, and discharge‑indexed rasters (plus a domain mask). Maintaining this structure ensures libraries remain composable in near real time and simplifies cloud storage and retrieval.
+From an operational standpoint, the library structure should remain consistent with Flows2FIM conventions: a directory per reach, subdirectories per downstream stage (WSE) level, and discharge‑indexed rasters (plus a domain mask). Maintaining this structure ensures libraries remain composable in near real time and simplifies cloud storage and retrieval.
 
 [talk about data model]
 
@@ -303,6 +320,8 @@ Large rivers and wide floodplains can require large domains or reach eclipsing, 
 ### Volume‑Driven Areas
 Some areas respond more to flood volume than peak discharge (e.g., lakes, reservoirs, and extensive floodplains). These settings require alternative handling beyond discharge‑only library selection.
 
+Taken together, these limitations do not negate the approach. They clarify where automation needs guardrails and targeted exceptions so the system remains fit for rapid, decision‑support mapping.
+
 ## Discussion and Next Steps
 This report proposes a defensible, automatable methodology grounded in pilot evidence and a structured decision process. The next phase will refine open decisions, select a production model, and implement a prototype pipeline for a HUC6-scale area. The SDR system will continue to capture decision evolution, ensuring that methodology changes are traceable and evidence-based.
 
@@ -322,6 +341,26 @@ Recommended next steps are best framed as a short‑term roadmap tied to time, w
 
 SDR updates should accompany each phase to keep decision rationale traceable.
 
+## References
+Bates, P. D., and A. P. J. De Roo (2000), A simple raster‑based model for flood inundation simulation, *Journal of Hydrology*, 236, 54–77, https://doi.org/10.1016/S0022-1694(00)00278-X.
+
+Baugh, C., J. Colonese, C. D'Angelo, F. Dottori, J. Neal, C. Prudhomme, and P. Salamon (2024), Global river flood hazard maps, European Commission, Joint Research Centre (JRC) [Dataset], http://data.europa.eu/89h/jrc-floods-floodmapgl_rp50y-tif (accessed 12 Feb 2026).
+
+Eilander, D., et al. (2023a), HydroMT: Automated and reproducible model building and analysis, *Journal of Open Source Software*, 8(83), 4897, https://doi.org/10.21105/joss.04897.
+
+Eilander, D., et al. (2023b), A globally applicable framework for compound flood hazard modeling, *Natural Hazards and Earth System Sciences*, 23, 823–, https://doi.org/10.5194/nhess-23-823-2023.
+
+NextGen Water Prediction Capabilities (NGWPC) (n.d.-a), Ripple1D (software), GitHub repository, https://github.com/NGWPC/ripple1d (accessed 12 Feb 2026).
+
+NextGen Water Prediction Capabilities (NGWPC) (n.d.-b), flows2fim (software), GitHub repository, https://github.com/NGWPC/flows2fim (accessed 12 Feb 2026).
+
+Sanders, B. F., O. E. J. Wing, and P. D. Bates (2024), Flooding is not like filling a bath, *Earth’s Future*, 12(12), e2024EF005164, https://doi.org/10.1029/2024EF005164.
+
+U.S. Geological Survey (n.d.-a), Flood Inundation Mapping (FIM) Program, https://www.usgs.gov/mission-areas/water-resources/science/flood-inundation-mapping-fim-program (accessed 12 Feb 2026).
+
+U.S. Geological Survey (n.d.-b), Flood Inundation Mapping Science, https://www.usgs.gov/mission-areas/water-resources/science/flood-inundation-mapping-science (accessed 12 Feb 2026).
+
+Wing, O. E. J., et al. (2019), A flood inundation forecast of Hurricane Harvey using a continental‑scale 2D hydrodynamic model, *Journal of Hydrology X*, 4, 100039, https://doi.org/10.1016/j.hydroa.2019.100039.
 
 ## Appendices
 ### Test Cases
