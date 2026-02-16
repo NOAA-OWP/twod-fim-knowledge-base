@@ -1,24 +1,23 @@
 # Methodology Report: Automated 2D Hydrodynamic Reach-Based FIM Libraries for Operational Flood Forecasting
 
 ## Executive Summary
-This report presents a pilot‑informed methodology for producing nationwide 2D flood inundation map (FIM) libraries using reach‑based hydrodynamic modeling to move beyond the GIS‑based Height Above Nearest Drainage (HAND) approach. The approach preserves the Flows2FIM operational pattern of pre‑generated per‑reach libraries that can be assembled in near real time. Unlike Ripple1D, the reach‑level 2D models are built from scratch through an automated pipeline rather than repurposed from existing studies.
+This report presents a pilot‑informed methodology for producing nationwide 2D flood inundation map (FIM) libraries using reach‑based hydrodynamic modeling to move beyond the GIS‑based Height Above Nearest Drainage (HAND) methods. The approach preserves the Flows2FIM operational pattern of pre‑generated per‑reach libraries that can be assembled in near real time. Unlike Ripple1D, the reach‑level 2D models are built from scratch through an automated pipeline rather than repurposed from existing studies.
 
-Our work to date has focused on developing a “loose” methodology that can be automated, identifying decisions that materially affect outcomes, and recording evidence for those decisions through a system decision record (SDR) process.
+Our work to date has focused on developing a “structured” methodology that can be automated, identifying decisions that materially affect outcomes, and recording evidence for those decisions through a system decision record (SDR) process.
 
 (to do: redo this section after Key Decision section is updated) Key outcomes to date indicate that a reach‑based 2D library approach is feasible and integrates directly with existing Flows2FIM mosaicking workflows. Downstream stage transfer is required at confluences and other backwater‑sensitive settings because normal‑depth‑only boundaries underpredict water‑surface elevations (WSEL). Domain and stage‑transfer geometry must extend beyond hydrofabric divides in wide floodplains, and coarse modeling helps place transfer lines in large rivers. DEM conditioning around culverts and structures is critical to avoid divergent flow paths and impoundment artifacts. Lake and coastal reaches require non‑standard handling, where GIS‑based or waterbody‑stage approaches are more appropriate.
 
 This report documents the conceptual framework, the evidence‑driven methodology evolution, a proposed automation workflow, known limitations, and a unified appendix of test cases. Once approved, the methodology will be refined and implemented in a prototype area before scaling.
 
 ## Introduction
-OWP currently produces nationwide flood inundation maps using HAND (Height Above Nearest Drainage) method and, where available, HEC‑RAS 1D based libraries from Ripple1D (NGWPC, n.d.-a). These approaches provide broad coverage and operational reliability, but they have known limits in physical accuracy, reproducibility, and the ability to adapt across diverse hydraulic settings. Recent advances in GPU/HPC compute, cloud parallelization, and modern 2D hydrodynamic solvers make it feasible to apply 2D modeling beyond local studies and into a national library‑based system.
+OWP currently produces nationwide flood inundation maps using HAND (Height Above Nearest Drainage) method and, where available, HEC‑RAS 1D based libraries from Ripple1D (NGWPC, n.d.-a). These approaches provide broad coverage and operational reliability, however limitations including physics derived accuracy, reproducibility, and flexibility to handle diverse hydraulic settings are well documented. Bathtub or level‑pool methods such as HAND treat flooding as a static surface and do not represent flow routing, backwater, or structure‑influenced hydraulics. These methods can produce large biases in inundation area (e.g., >200% error) and recent work calls for avoiding them in decision‑relevant flood‑management practice (Sanders et al., 2024). Recent incorporation of Ripple1D libraries improves physical accuracy by leveraging 1D hydraulic models and cross‑sectional data from existing studies, but reliance on **prebuilt legacy models** brings their irregularities such as sparse and discontinuous coverage, inconsistent development methodologies, terrain/data mismatches, and outdated inputs (i.e., unknown or superseded data sources) into OWP's operational flood inundation mapping. As a result, Ripple1D can improve local fidelity but adds complexity and coverage gaps.
 
-Bathtub or level‑pool methods such as HAND treat flooding as a static surface and do not represent flow routing, backwater, or structure‑influenced hydraulics. These methods can produce large biases in inundation area (e.g., >200% error) and recent work calls for avoiding them in decision‑relevant flood‑management practice (Sanders et al., 2024). Recent incorporation of Ripple1D libraries improves physical realism by leveraging 1D hydraulic models and cross‑sectional data from existing studies, but reliance on **prebuilt legacy models** brings their irregularities such as sparse and discontinuous coverage, inconsistent development methodologies, terrain/data mismatches, and outdated inputs (i.e., unknown or superseded data sources) into OWP's operational flood inundation mapping. As a result, Ripple1D can improve local fidelity but adds complexity and coverage gaps.
+Acknowledging the aforementioned limitations, these methods were selected in part to achieve the goal of creating a product with complete national coverage, and the cost effectiveness and scalability of these methods was a key factor for not developing physics based models. Having achieved a national coverage benchmark, along with recent advances in GPU/HPC compute, cloud parallelization, and modern 2D hydrodynamic solvers, it is now feasible to apply 2D modeling beyond local studies and into a national library‑based system. This report proposes a 2D hydrodynamic reach‑based library approach to address these gaps. The approach builds reach‑level models from scratch through an automated pipeline while preserving the Ripple1D and Flows2FIM operational pattern: pre‑generate per‑reach FIM libraries and mosaic them downstream‑to‑upstream in near real time using nowcast or forecast discharges (NGWPC, n.d.-a, n.d.-b). The key difference is how the libraries are derived—the computational engine is 2D hydrodynamics rather than 1D, and model construction is automated rather than repurposed from legacy studies (See Fig. 1 for visual explanation). Because 2D modeling is computationally intensive, the workflow shifts heavy computation (i.e. model simulations) to a pre‑processing step, so forecast‑time FIM development is limited to the rapid assembly step of creating a lightweight selection‑and‑mosaic pointer product (vrt) rather than a new simulation.
 
-This report proposes a 2D hydrodynamic reach‑based library approach to address these gaps. The approach builds reach‑level models from scratch through an automated pipeline while preserving the Ripple1D and Flows2FIM operational pattern: pre‑generate per‑reach FIM libraries and mosaic them downstream‑to‑upstream in near real time using nowcast or forecast discharges (NGWPC, n.d.-a, n.d.-b). The key difference is how the libraries are derived—the computational engine is 2D hydrodynamics rather than 1D, and model construction is automated rather than repurposed from legacy studies (See Fig. 1 for visual explanation). Because 2D modeling is computationally intensive, the workflow shifts heavy computation to pre‑processing so forecast‑time assembly is a lightweight selection‑and‑mosaic step rather than a new simulation. 
+This report lays out a pilot‑informed, initial, scalable methodology and explains how it was developed, where the most consequential decisions sit, and where uncertainty remains. It documents those decisions and open questions through a System Decision Records (SDR) process, and defines the conceptual framework, automation logic, and operational interfaces needed to implement the approach. Once approved, the methodology will be refined and tested in a prototype area before scaling further.
 
-This report lays out a pilot‑informed, initial, automatable methodology and explains how it was developed, where the most consequential decisions sit, and where uncertainty remains. It documents those decisions and open questions through System Decision Records (SDR), and defines the conceptual framework, automation logic, and operational interfaces needed to implement the approach. Once approved, the methodology will be refined and tested in a prototype area before scaling further.
+The intent of the work described in the following sections is to assess implementation readiness for 2D reach‑based FIM libraries and to sharpen methodological clarity. The work does not deliver a final production automation workflow; instead, it establishes the foundation for upcoming tasks to achieve that goal. The scope therefore focuses on describing the workflow, documenting decision evidence, and identifying where specialized handling or additional validation is required before national‑scale production.
 
-The intent of the work described in this report is to assess implementation readiness for 2D reach‑based FIM libraries and to sharpen methodological clarity. The work does not deliver a final production automation workflow; instead, it establishes the foundation for that. The scope therefore focuses on describing the workflow, documenting decision evidence, and identifying where specialized handling or additional validation is required before national‑scale production.
 
 ![Reach-based hydrodynamic modeling for the National Water Model using 1D and 2D approaches](methodology-report/image1.png)
 *Figure 1. Reach‑based hydrodynamic modeling for the National Water Model river network using Ripple1D and 2D approaches. Ripple1D relies on existing 1D models and conflates their cross sections onto target reaches to build reach‑based models. The new 2D methodology does not rely on existing models; it creates a new 2D model for each reach domain, illustrated by the different colored grids in the rightmost panel.*
@@ -27,7 +26,7 @@ The intent of the work described in this report is to assess implementation read
 This project sits at the intersection of three mature research threads: **library‑based inundation mapping**, **large‑scale 2D hydrodynamics**, and **automated model setup**. The literature below provides the closest precedents and highlights where our approach diverges.
 
 ### Library‑based inundation mapping (operational precedents)
-The USGS Flood Inundation Mapping (FIM) program defines a **map library** as a set of inundation maps at discrete stages, linked to gages and used operationally for preparedness and response. The USGS process emphasizes repeatable model construction, calibration, and library publication for real‑time use, which is conceptually aligned with our library‑first paradigm (even though it is local and not reach‑based at national scale). This is a strong institutional precedent for the idea that *precomputed libraries + real‑time lookup* can be operationally reliable (U.S. Geological Survey, n.d.-a, n.d.-b).  
+The USGS Flood Inundation Mapping (FIM) program defines a **map library** as a set of inundation maps at discrete stages, linked to gages and used operationally for preparedness and response. The USGS process emphasizes repeatable model construction, calibration, and library publication for real‑time use, which is conceptually aligned with our library‑first paradigm (even though it is local and not reach‑based at national scale). This is a strong institutional precedent for the idea that *precomputed libraries + real‑time lookup* can be operationally reliable (U.S. Geological Survey, n.d.-a, n.d.-b).
 
 ### Continental‑scale 2D forecasting with precomputed libraries (closest analogue)
 The Hurricane Harvey study by Wing et al. (2019) is the closest direct analogue. The authors coupled **Fathom‑US** (a continental‑scale 2D model based on LISFLOOD‑FP) to NOAA forecasts of streamflow, rainfall, and coastal surge. For Harvey, **fluvial inundation was extracted from an existing US‑wide simulation library**, while pluvial and coastal components were simulated for the event. The study produced medium‑term (2–15 day) forecasts and hindcasts, with reported skill around CSI ≈ 0.66 for maximum extent and mean water‑surface error on the order of ~1 m against USGS benchmarks. This work demonstrates that a national 2D library can be operationally coupled to forecasts without crippling lead times. Our approach differs by (1) making the library **reach‑based** (outputs are organized and indexed per reach), (2) emphasizing **downstream stage transfer** between connected reaches, (3) treating library construction as a **per‑reach automation workflow** rather than a single continental model build, and (4) indexing libraries by a **discharge × downstream‑WSEL matrix** rather than return‑period flow bins.
@@ -65,7 +64,7 @@ Under this framework, each reach model consists of a rectangular domain, an infl
 ![Example geometry for a single reach-based model showing inflow, outflow, and stage transfer lines](methodology-report/image2.png)
 *Figure 2. Example geometry for a single reach-based model showing inflow, outflow, and stage transfer lines.*
 
-Operationally, this library framework relies on a simple architecture that mirrors Flows2FIM: (1) **pre‑computed FIM libraries** of rasters indexed by reach, discharge, and downstream stage; (2) a **rating‑curve database** that relates discharge and downstream WSEL to the library indices; and 
+Operationally, this library framework relies on a simple architecture that mirrors Flows2FIM: (1) **pre‑computed FIM libraries** of rasters indexed by reach, discharge, and downstream stage; (2) a **rating‑curve database** that relates discharge and downstream WSEL to the library indices; and
 
 During operations, Flows2FIM assembles these maps by traversing the river network downstream‑to‑upstream and selecting the closest library entry for each reach based on discharge and downstream conditions. This is a lightweight extraction and mosaicking step that runs in seconds without new hydraulic modeling. The separation keeps heavy computation offline and makes operational assembly tractable.
 
@@ -145,7 +144,7 @@ Table 2 lists the summary results of the survey of 2D models and the model selec
 
 Based on this survey exercise, LISFLOOD-FP, TRITON, and SFINCS remain active candidates. Although final selection is planned after focused benchmark testing of speed, stability, and feature maturity, the pilot development and automation research still required us to land on one model, so that we can develop our tooling around it and stay focus on developing methodology and not on details of different models.
 
-Our initial research showed LISFLOOD-FP to be best candidate and hence we decided to use LISFLOOD-FP for our tooling development. Since our choice of going through with using LISFLOOD-FP we have learned more about SFINCS and the active development that is going on in its ecosystem, this makes SFINCS a very potent candidate and in the future we plan to explore SFINCS further. TRITON as of now is least favorable candidate, mainly because (to do:). 
+Our initial research showed LISFLOOD-FP to be best candidate and hence we decided to use LISFLOOD-FP for our tooling development. Since our choice of going through with using LISFLOOD-FP we have learned more about SFINCS and the active development that is going on in its ecosystem, this makes SFINCS a very potent candidate and in the future we plan to explore SFINCS further. TRITON as of now is least favorable candidate, mainly because (to do:).
 
 HEC-RAS faces several challenges when it comes to large-scale cloud-based modeling backed by automation due to:
 -   Dependency on Windows-based operations
@@ -381,241 +380,241 @@ Wing, O. E. J., et al. (2019), A flood inundation forecast of Hurricane Harvey u
 The cases below include initial pilot sites and targeted SDR cases. Each case was selected for unique characteristics or known issues. All cases follow the same format to support consistent interpretation and future updates.
 
 #### Case A — Spring Creek near Iron City, GA (Pilot)
-**Description**: Small rivers in rural agriculture, unconfined corridor, and confluences.  
-**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder]. Gages: USGS 02357000 (mainstem), StreamStats (tributary).  
-**Setting**:  
+**Description**: Small rivers in rural agriculture, unconfined corridor, and confluences.
+**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder]. Gages: USGS 02357000 (mainstem), StreamStats (tributary).
+**Setting**:
 ![Spring Creek pilot site map](methodology-report/image8.png)
-*Figure TBD. Spring Creek pilot site overview.*  
+*Figure TBD. Spring Creek pilot site overview.*
 ![Spring Creek reach layout](methodology-report/image9.jpeg)
-*Figure TBD. Reach layout for Spring Creek pilot.*  
-**What Was Performed**: Automated model build and manual review of STL and domain coverage.  
-**What Was Discovered**: Transfer lines and domains did not always span the lateral floodplain; extensions reduced boundary ponding.  
+*Figure TBD. Reach layout for Spring Creek pilot.*
+**What Was Performed**: Automated model build and manual review of STL and domain coverage.
+**What Was Discovered**: Transfer lines and domains did not always span the lateral floodplain; extensions reduced boundary ponding.
 **Issues Encountered**: Truncated flood extents at domain edges; STL coverage gaps in confluence areas.
 
 ![Extended domain and STL example](methodology-report/image10.png)
-*Figure TBD. Example of domain/STL extension to cover lateral floodplain.*  
+*Figure TBD. Example of domain/STL extension to cover lateral floodplain.*
 ![Transfer line extension example](methodology-report/image11.png)
-*Figure TBD. Transfer line extended to match floodplain extent.*  
+*Figure TBD. Transfer line extended to match floodplain extent.*
 ![Generated FIM example](methodology-report/image12.png)
 *Figure TBD. Example FIM output from Spring Creek pilot.*
 
 #### Case B — Quartz Creek near Ohio City, CO (Pilot)
-**Description**: Steep terrain with multiple headwaters and tributaries.  
-**Properties**: Flows: 500‑year (pilot). Stream orders: [Placeholder]. Slopes: [Placeholder]. Gage: USGS 09118000 (mainstem).  
-**Setting**:  
+**Description**: Steep terrain with multiple headwaters and tributaries.
+**Properties**: Flows: 500‑year (pilot). Stream orders: [Placeholder]. Slopes: [Placeholder]. Gage: USGS 09118000 (mainstem).
+**Setting**:
 ![Quartz Creek pilot site map](methodology-report/image13.png)
-*Figure TBD. Quartz Creek pilot site overview.*  
-**What Was Performed**: Automated STL and domain creation with manual corrections.  
-**What Was Discovered**: Several STLs needed trimming or redrawing to avoid artificial tie‑ins; some required extension to cover the floodplain.  
+*Figure TBD. Quartz Creek pilot site overview.*
+**What Was Performed**: Automated STL and domain creation with manual corrections.
+**What Was Discovered**: Several STLs needed trimming or redrawing to avoid artificial tie‑ins; some required extension to cover the floodplain.
 **Issues Encountered**: Artificial floodplain tie‑ins at confluences when STL overlapped the wrong divide.
 
 ![Transfer line trim example](methodology-report/image14.png)
-*Figure TBD. STL trimmed to avoid incorrect floodplain tie‑in.*  
+*Figure TBD. STL trimmed to avoid incorrect floodplain tie‑in.*
 ![Transfer line redraw example](methodology-report/image15.png)
-*Figure TBD. STL redrawn to align with correct floodplain.*  
+*Figure TBD. STL redrawn to align with correct floodplain.*
 ![Transfer line update example](methodology-report/image16.png)
-*Figure TBD. STL updated to overlap receiver floodplain.*  
+*Figure TBD. STL updated to overlap receiver floodplain.*
 ![Generated FIM example](methodology-report/image17.png)
 *Figure TBD. Example FIM output from Quartz Creek pilot.*
 
 #### Case C — Delaware River at Trenton, NJ (Pilot)
-**Description**: Urban mainstem and tributary confluence with structures.  
-**Properties**: Flows: 100‑year (pilot). Stream orders: [Placeholder]. Slopes: [Placeholder]. Gages: USGS 01463500 (mainstem), 01464000 (tributary).  
-**Setting**:  
+**Description**: Urban mainstem and tributary confluence with structures.
+**Properties**: Flows: 100‑year (pilot). Stream orders: [Placeholder]. Slopes: [Placeholder]. Gages: USGS 01463500 (mainstem), 01464000 (tributary).
+**Setting**:
 ![Delaware River pilot site map](methodology-report/image18.png)
-*Figure TBD. Delaware River pilot site overview.*  
-**What Was Performed**: Automated model build with manual review; culvert‑burning comparison.  
-**What Was Discovered**: Small reaches fully inundated at low flows were inefficient and were eclipsed or merged; culvert burning materially changed backwater and inundation.  
+*Figure TBD. Delaware River pilot site overview.*
+**What Was Performed**: Automated model build with manual review; culvert‑burning comparison.
+**What Was Discovered**: Small reaches fully inundated at low flows were inefficient and were eclipsed or merged; culvert burning materially changed backwater and inundation.
 **Issues Encountered**: Structure‑related impoundment in unconditioned DEM; wide floodplains exceeded default domain/STL extents.
 
 ![Eclipsed reaches example](methodology-report/image19.png)
-*Figure TBD. Example of eclipsed/merged reaches in urban setting.*  
+*Figure TBD. Example of eclipsed/merged reaches in urban setting.*
 ![Overlay of modeled rasters](methodology-report/image20.png)
-*Figure TBD. Overlay of modeled rasters for tie‑in review.*  
+*Figure TBD. Overlay of modeled rasters for tie‑in review.*
 ![Culvert‑burning terrain comparison](methodology-report/image21.jpeg)
-*Figure TBD. Terrain comparison with and without culvert burning.*  
+*Figure TBD. Terrain comparison with and without culvert burning.*
 ![Culvert impact on inundation](methodology-report/image22.jpeg)
 *Figure TBD. Impact of culvert representation on inundation extent.*
 
 #### Case D — Gila River, AZ (Pilot)
-**Description**: [Placeholder: site description.]  
-**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder]. Gages: [Placeholder].  
-**Setting**: [Placeholder: site map and reach layout.]  
-**What Was Performed**: [Placeholder.]  
-**What Was Discovered**: [Placeholder.]  
+**Description**: [Placeholder: site description.]
+**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder]. Gages: [Placeholder].
+**Setting**: [Placeholder: site map and reach layout.]
+**What Was Performed**: [Placeholder.]
+**What Was Discovered**: [Placeholder.]
 **Issues Encountered**: [Placeholder.]
 
 #### Case E — Ohio River at Evansville, IN (Pilot)
-**Description**: Large river with very wide floodplain and low slope.  
-**Properties**: Flows: 10‑, 50‑, 100‑, 500‑year. Stream orders: [Placeholder]. Slopes: ~0.00003 (pilot). DEM: 30 m (pilot).  
-**Setting**:  
+**Description**: Large river with very wide floodplain and low slope.
+**Properties**: Flows: 10‑, 50‑, 100‑, 500‑year. Stream orders: [Placeholder]. Slopes: ~0.00003 (pilot). DEM: 30 m (pilot).
+**Setting**:
 ![Ohio River pilot site overview](methodology-report/image23.jpeg)
-*Figure TBD. Ohio River pilot site overview.*  
-**What Was Performed**: Coarse model run to guide STL placement; reach grouping for large‑river handling.  
-**What Was Discovered**: Hydrofabric divides were too narrow for STLs; coarse models provided appropriate WSEL contours for STL placement.  
+*Figure TBD. Ohio River pilot site overview.*
+**What Was Performed**: Coarse model run to guide STL placement; reach grouping for large‑river handling.
+**What Was Discovered**: Hydrofabric divides were too narrow for STLs; coarse models provided appropriate WSEL contours for STL placement.
 **Issues Encountered**: Inefficient overlap when STLs span full floodplain; bathymetry limitations affected stage accuracy.
 
 ![FEMA floodplain context](methodology-report/image24.jpeg)
-*Figure TBD. FEMA floodplain context for large‑river pilot.*  
+*Figure TBD. FEMA floodplain context for large‑river pilot.*
 ![Coarse model WSEL contours](methodology-report/image25.jpeg)
-*Figure TBD. Coarse model WSEL contours used to guide STL placement.*  
+*Figure TBD. Coarse model WSEL contours used to guide STL placement.*
 ![Reach segmentation example](methodology-report/image26.jpeg)
-*Figure TBD. Example reach segmentation for large river.*  
+*Figure TBD. Example reach segmentation for large river.*
 ![Large river reach eclipsing](methodology-report/image27.png)
-*Figure TBD. Eclipsing reaches justified for large‑river efficiency.*  
+*Figure TBD. Eclipsing reaches justified for large‑river efficiency.*
 ![Bathymetry sensitivity](methodology-report/image28.png)
 *Figure TBD. Bathymetry influence on stage accuracy.*
 
 #### Case F — Susquehanna River at Binghamton, NY (Pilot)
-**Description**: Complex confluence with levees, divergence, and multiple flow changes.  
-**Properties**: Flows: 10‑, 100‑, 500‑year. Stream orders: [Placeholder]. Slopes: [Placeholder]. Gage‑weighted flows from BLE study.  
-**Setting**:  
+**Description**: Complex confluence with levees, divergence, and multiple flow changes.
+**Properties**: Flows: 10‑, 100‑, 500‑year. Stream orders: [Placeholder]. Slopes: [Placeholder]. Gage‑weighted flows from BLE study.
+**Setting**:
 ![Susquehanna pilot site overview](methodology-report/image29.png)
-*Figure TBD. Susquehanna pilot site overview.*  
-**What Was Performed**: Eclipsed/merged short reaches; multi‑reach model review against FEMA BLE.  
-**What Was Discovered**: Strong agreement with BLE where geometry was well handled; divergence behavior challenged strict reach‑based separation.  
+*Figure TBD. Susquehanna pilot site overview.*
+**What Was Performed**: Eclipsed/merged short reaches; multi‑reach model review against FEMA BLE.
+**What Was Discovered**: Strong agreement with BLE where geometry was well handled; divergence behavior challenged strict reach‑based separation.
 **Issues Encountered**: Anabranching‑like spill paths; need for combined models or expanded domains in hydraulically coupled areas.
 
 ![Eclipsed reach examples](methodology-report/image30.png)
-*Figure TBD. Eclipsed/merged short reaches near confluence.*  
+*Figure TBD. Eclipsed/merged short reaches near confluence.*
 ![10-year FIM](methodology-report/image31.png)
-*Figure TBD. 10‑year discharge FIM example.*  
+*Figure TBD. 10‑year discharge FIM example.*
 ![100-year FIM](methodology-report/image32.png)
-*Figure TBD. 100‑year discharge FIM example.*  
+*Figure TBD. 100‑year discharge FIM example.*
 ![500-year FIM](methodology-report/image33.png)
-*Figure TBD. 500‑year discharge FIM example.*  
+*Figure TBD. 500‑year discharge FIM example.*
 ![100-year comparison to FEMA BLE](methodology-report/image34.png)
-*Figure TBD. 100‑year comparison to FEMA BLE.*  
+*Figure TBD. 100‑year comparison to FEMA BLE.*
 ![500-year comparison to FEMA BLE](methodology-report/image35.png)
 *Figure TBD. 500‑year comparison to FEMA BLE.*
 
 #### Case G — Unnamed Wash near Hiko, NV (Pilot)
-**Description**: Desert wash with steep slopes and complex flow paths.  
-**Properties**: Flows: 100‑year (pilot). Stream orders: [Placeholder]. Slopes: [Placeholder]. Gage: USGS 09415600 (mainstem).  
-**Setting**:  
+**Description**: Desert wash with steep slopes and complex flow paths.
+**Properties**: Flows: 100‑year (pilot). Stream orders: [Placeholder]. Slopes: [Placeholder]. Gage: USGS 09415600 (mainstem).
+**Setting**:
 ![Unnamed wash pilot site overview](methodology-report/image36.jpeg)
-*Figure TBD. Unnamed wash pilot site overview.*  
-**What Was Performed**: Automated model build; review of highway crossing effects.  
-**What Was Discovered**: Road crossings without culvert representation caused upstream impoundment.  
+*Figure TBD. Unnamed wash pilot site overview.*
+**What Was Performed**: Automated model build; review of highway crossing effects.
+**What Was Discovered**: Road crossings without culvert representation caused upstream impoundment.
 **Issues Encountered**: Structure‑related flow blockage; potential for divergent flow paths in arid systems.
 
 ![100-year FIM example](methodology-report/image37.jpeg)
-*Figure TBD. 100‑year discharge FIM example.*  
+*Figure TBD. 100‑year discharge FIM example.*
 ![Highway crossing location](methodology-report/image38.png)
-*Figure TBD. Highway crossing location and culvert context.*  
+*Figure TBD. Highway crossing location and culvert context.*
 ![Terrain showing road berm](methodology-report/image39.jpeg)
-*Figure TBD. Terrain showing road berm without culvert.*  
+*Figure TBD. Terrain showing road berm without culvert.*
 ![Depth raster showing impoundment](methodology-report/image40.jpeg)
 *Figure TBD. Depth raster showing impoundment upstream of crossing.*
 
 #### Case H — Lake Murray, SC (Pilot)
-**Description**: Lake/terminal reach behavior.  
-**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder].  
-**Setting**:  
+**Description**: Lake/terminal reach behavior.
+**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder].
+**Setting**:
 ![Lake Murray pilot site overview](methodology-report/image41.jpeg)
-*Figure TBD. Lake Murray pilot site overview.*  
-**What Was Performed**: Tested reach‑based modeling feasibility.  
-**What Was Discovered**: Reach‑based 2D modeling is not appropriate in large waterbodies; GIS‑based handling is preferred.  
+*Figure TBD. Lake Murray pilot site overview.*
+**What Was Performed**: Tested reach‑based modeling feasibility.
+**What Was Discovered**: Reach‑based 2D modeling is not appropriate in large waterbodies; GIS‑based handling is preferred.
 **Issues Encountered**: Discharge‑based forecasting breaks down; need for pour‑point or waterbody‑stage handling.
 
 ![Lake Murray example output](methodology-report/image42.jpeg)
 *Figure TBD. Example output for lake/terminal reach setting.*
 
 #### Case I — Plum Island Sound, MA (Pilot)
-**Description**: Coastal setting influenced by tides.  
-**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder]. Tidal gages: [Placeholder].  
-**Setting**:  
+**Description**: Coastal setting influenced by tides.
+**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder]. Tidal gages: [Placeholder].
+**Setting**:
 ![Plum Island Sound pilot site overview](methodology-report/image43.jpeg)
-*Figure TBD. Plum Island Sound pilot site overview.*  
-**What Was Performed**: Evaluated reach‑based feasibility; considered tidal stage inputs.  
-**What Was Discovered**: Coastal reaches are better handled with GIS‑based approaches and tidal stage inputs.  
+*Figure TBD. Plum Island Sound pilot site overview.*
+**What Was Performed**: Evaluated reach‑based feasibility; considered tidal stage inputs.
+**What Was Discovered**: Coastal reaches are better handled with GIS‑based approaches and tidal stage inputs.
 **Issues Encountered**: Reach‑based discharge methods do not capture coastal boundary dynamics.
 
 #### Case 001 — Y‑Shape Confluence with Stream‑Order Mismatch (SDR)
-**Description**: Confluence with two‑level stream‑order difference and strong backwater sensitivity.  
-**Properties**: Flows: 500, 6000. Stream orders: 4 and 6. Coords: (1930357, 2289467) EPSG:5070.  
-**Setting**:  
+**Description**: Confluence with two‑level stream‑order difference and strong backwater sensitivity.
+**Properties**: Flows: 500, 6000. Stream orders: 4 and 6. Coords: (1930357, 2289467) EPSG:5070.
+**Setting**:
 ![Y‑shape confluence setting](methodology-report/Case-001_Fig-001.png)
-*Figure TBD. Y‑shape confluence with stream‑order mismatch.*  
-**What Was Performed**: Compared normal‑depth downstream boundary vs downstream stage transfer.  
-**What Was Discovered**: Normal‑depth runs underpredicted WSEL near the downstream tie‑in; stage transfer preserved backwater.  
+*Figure TBD. Y‑shape confluence with stream‑order mismatch.*
+**What Was Performed**: Compared normal‑depth downstream boundary vs downstream stage transfer.
+**What Was Discovered**: Normal‑depth runs underpredicted WSEL near the downstream tie‑in; stage transfer preserved backwater.
 **Issues Encountered**: Lower WSEL at reach end without stage transfer.
 
 ![KWSE vs normal depth comparison](methodology-report/Case-001_Fig-002.png)
-*Figure TBD. KWSE vs normal-depth comparison near tie‑in.*  
+*Figure TBD. KWSE vs normal-depth comparison near tie‑in.*
 ![Water leaving the domain under normal-depth edges](methodology-report/Case-001_Fig-003.png)
 *Figure TBD. Water leaving the domain at non‑outlet locations.*
 
 #### Case 002 — Lake Reach (SDR)
-**Description**: Riverine reach discharging into a lake.  
-**Properties**: Flows: 2680. Stream order: 4. Coords: (1786548, 2606475) EPSG:5070.  
-**Setting**:  
+**Description**: Riverine reach discharging into a lake.
+**Properties**: Flows: 2680. Stream order: 4. Coords: (1786548, 2606475) EPSG:5070.
+**Setting**:
 ![Lake reach setting](methodology-report/Case-002_Fig-001.png)
-*Figure TBD. Lake reach setting.*  
-**What Was Performed**: Tested low‑slope normal‑depth boundary vs stage transfer.  
-**What Was Discovered**: Low‑slope normal depth caused pooling; stage transfer stabilized downstream water surface.  
+*Figure TBD. Lake reach setting.*
+**What Was Performed**: Tested low‑slope normal‑depth boundary vs stage transfer.
+**What Was Discovered**: Low‑slope normal depth caused pooling; stage transfer stabilized downstream water surface.
 **Issues Encountered**: Higher WSEL near downstream end with low‑slope boundary.
 
 ![Normal-depth run](methodology-report/Case-002_Fig-002.png)
-*Figure TBD. Normal-depth run for lake reach.*  
+*Figure TBD. Normal-depth run for lake reach.*
 ![KWSE run](methodology-report/Case-002_Fig-003.png)
-*Figure TBD. Downstream stage transfer run for lake reach.*  
+*Figure TBD. Downstream stage transfer run for lake reach.*
 ![Low-slope boundary test](methodology-report/Case-002_Fig-004.png)
 *Figure TBD. Low-slope boundary condition causing pooling.*
 
 #### Case 003 — Small Culverts (SDR)
-**Description**: Small culverts not represented in DEM caused divergent flow paths and impoundment.  
-**Properties**: Flows: 36.75. Stream order: 1. Coords: (1796329.9, 2607407.4) EPSG:5070.  
-**Setting**:  
+**Description**: Small culverts not represented in DEM caused divergent flow paths and impoundment.
+**Properties**: Flows: 36.75. Stream order: 1. Coords: (1796329.9, 2607407.4) EPSG:5070.
+**Setting**:
 ![Small culverts setting](methodology-report/Case-003_FIG-001.png)
-*Figure TBD. Small culverts case setting.*  
-**What Was Performed**: Ran models with unmodified DEM and compared to expected flowpaths.  
-**What Was Discovered**: Unburned culverts diverted flow and reduced downstream inundation.  
+*Figure TBD. Small culverts case setting.*
+**What Was Performed**: Ran models with unmodified DEM and compared to expected flowpaths.
+**What Was Discovered**: Unburned culverts diverted flow and reduced downstream inundation.
 **Issues Encountered**: Divergent flowpath; culvert blocking flow.
 
 ![Divergent flowpath example](methodology-report/Case-003_FIG-002.png)
-*Figure TBD. Divergent flowpath due to unburned culverts.*  
+*Figure TBD. Divergent flowpath due to unburned culverts.*
 ![Culvert blocking flow](methodology-report/Case-003_FIG-007.png)
-*Figure TBD. Flow impounded by culvert obstruction.*  
+*Figure TBD. Flow impounded by culvert obstruction.*
 ![Culvert blocking flow (alternate view)](methodology-report/Case-003_FIG-008.png)
 *Figure TBD. Additional example of culvert obstruction impacts.*
 
 #### Case 004 — Model Domain Example (SDR)
-**Description**: Reach‑divide domain truncated flood extent.  
-**Properties**: Flows: 2344. Stream order: 4. Coords: (1798555, 2602987) EPSG:5070.  
-**Setting**:  
+**Description**: Reach‑divide domain truncated flood extent.
+**Properties**: Flows: 2344. Stream order: 4. Coords: (1798555, 2602987) EPSG:5070.
+**Setting**:
 ![Model domain example setting](methodology-report/Case-004_FIG-001.png)
-*Figure TBD. Model domain example showing truncation.*  
-**What Was Performed**: Built domain from reach divide and compared to benchmark.  
-**What Was Discovered**: Floodplain extent cut off at domain edges.  
+*Figure TBD. Model domain example showing truncation.*
+**What Was Performed**: Built domain from reach divide and compared to benchmark.
+**What Was Discovered**: Floodplain extent cut off at domain edges.
 **Issues Encountered**: FIM cutting off arbitrarily at edges.
 
 ![Benchmark comparison](methodology-report/Case-004_FIG-002.png)
 *Figure TBD. Comparison to benchmark FIM.*
 
 #### Case 005 — Model Domain Example 2 (SDR)
-**Description**: Tributary water pooled against mainstem domain edge.  
-**Properties**: Flows: 52.8. Stream order: 1. Coords: (1811265, 2594919) EPSG:5070.  
-**Setting**:  
+**Description**: Tributary water pooled against mainstem domain edge.
+**Properties**: Flows: 52.8. Stream order: 1. Coords: (1811265, 2594919) EPSG:5070.
+**Setting**:
 ![Model domain example 2 setting](methodology-report/Case-005_FIG-001.png)
-*Figure TBD. Tributary pooling against mainstem domain edge.*  
-**What Was Performed**: Reviewed domain behavior during modeled event.  
-**What Was Discovered**: Edge pooling can occur without hydraulic error but must be handled in automation.  
+*Figure TBD. Tributary pooling against mainstem domain edge.*
+**What Was Performed**: Reviewed domain behavior during modeled event.
+**What Was Discovered**: Edge pooling can occur without hydraulic error but must be handled in automation.
 **Issues Encountered**: Potential edge pooling artifacts.
 
 #### Case 006 — Inflow Boundary Conditions (SDR)
-**Description**: Inflow geometry effects on WSEL artifacts.  
-**Properties**: Flows: 13,500. Stream order: 6. Coords: (1903629, 2354784) EPSG:5070. USGS gage 01172000.  
-**Setting**:  
+**Description**: Inflow geometry effects on WSEL artifacts.
+**Properties**: Flows: 13,500. Stream order: 6. Coords: (1903629, 2354784) EPSG:5070. USGS gage 01172000.
+**Setting**:
 ![Inflow boundary conditions setting](methodology-report/Case-006_FIG-001.png)
-*Figure TBD. Inflow boundary conditions case setting.*  
-**What Was Performed**: Compared point vs line inflow geometries at multiple locations.  
-**What Was Discovered**: Point inflows produced bullseye WSEL artifacts; line inflows reduced artifacts.  
+*Figure TBD. Inflow boundary conditions case setting.*
+**What Was Performed**: Compared point vs line inflow geometries at multiple locations.
+**What Was Discovered**: Point inflows produced bullseye WSEL artifacts; line inflows reduced artifacts.
 **Issues Encountered**: Water‑surface elevation anomalies near inflow boundary.
 
 ![Point inflow artifacts](methodology-report/Case-006_FIG-002.png)
-*Figure TBD. Point inflow producing WSEL artifacts.*  
+*Figure TBD. Point inflow producing WSEL artifacts.*
 ![Line inflow (upstream mainstem)](methodology-report/Case-006_FIG-003.png)
-*Figure TBD. Line inflow on upstream mainstem.*  
+*Figure TBD. Line inflow on upstream mainstem.*
 ![Line inflow at reach start](methodology-report/Case-006_FIG-004.png)
 *Figure TBD. Line inflow at reach start.*
