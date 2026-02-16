@@ -166,20 +166,43 @@ In September of 2024, USACE released the alpha version of a major update to HEC-
 
 Collectively, these issues highlight the challenges HEC-RAS faces in transitioning to large-scale cloud-based modeling backed by automation.
 
-### Tooling
-Pilot work used a lightweight automation toolchain to generate model domains, stage-transfer geometry, boundary-condition geometry, and raster inputs. The toolchain was deliberately minimal: it was designed to accelerate iteration and enforce repeatable setup patterns while methodology questions were still open. This avoided overbuilding production software before decision stability was established.
+### Model Development WebApp
+To move from the conceptual framework to a testable methodology, this phase required some lose tooling that could fast track building many reach models for testing and provide somewhat consistency in model development. For this purpose, a draft StreamLit Python App was created to automate model development. This app was used throughout the testing and iteration process.
 
-From an automation perspective, this phase also confirmed a practical distinction between 1D and 2D workflows. In 1D, cross-section placement and refinement at hydraulically sensitive locations remain highly judgment-intensive. In 2D, that effort shifts toward grid/domain definition, boundary-condition placement, and terrain conditioning. The burden does not disappear, but it is more rule-driven and therefore better suited to scalable automation once decision rules are mature.
+The pilot app was intentionally loose and focused on repeatable preprocessing and setup steps such as generating reach domains, inflow and outflow boundary geometries, stage transfer lines (STLs), and aligned terrain/roughness rasters. It also templated run configurations for discharge and downstream-stage combinations so cases could be regenerated quickly as decision rules changed. During methodology development, design assumptions were still moving; a thin, modular toolchain allowed fast iteration without spending too much time early on coding solutions. It also made comparisons across test cases more defensible because geometry and preprocessing logic were applied consistently.
 
-Published large-scale automation efforts (for example, HydroMT-SFINCS workflows in NHESS) support this direction and provide external precedent that 2D setup can be industrialized when preprocessing rules are explicit and reproducible.
+Published large-scale automation efforts (for example, HydroMT-SFINCS workflows in NHESS) support this direction and provide external precedent that 2D setup can be automated when ruleset is explicit and reproducible.
+
+\<narrative on functionality of the web app either here or in appendix>
 
 ![Pilot tooling landing page / workflow overview](methodology-report/image7.png)
-*Figure TBD. Pilot tooling used to automate model construction and review.*
+*Figure 6. Pilot WebApp developed to automate model construction and review.*
 
 ### System Decision Records (SDR)
-SDR provides the governance layer for methodology development. Each decision is framed as a narrow technical question, alternatives are explicitly defined, and experiments/cases are linked as evidence for selection status. This turns method development into a traceable engineering process rather than ad hoc iteration.
+During initial pilot development, the WebApp made it possible to run many more cases quickly, and the main bottleneck shifted from model setup to decision governance: avoiding cycles on repeated questions and keeping rationale tied to evidence as edge cases accumulated.
 
-The practical value has been significant in three ways. First, SDR preserves reasoning so earlier choices do not need to be rediscovered when team members rotate or when similar issues reappear. Second, it enables structured revision: previously rejected alternatives can be revisited when new evidence exists, without erasing historical context. Third, it keeps open decisions visible, which helps prioritize pilot design and prevents hidden assumptions from entering automation logic.
+To address that bottleneck and systemize many smaller decisions that together form the overall methodology, we adopted System Decision Records (SDR), a structured decision-management framework adapted from Architecture Decision Records (ADR) that captures decision evolution, alternatives, and evidence rather than only the final choice. In this project, SDR is used as the governance mechanism for methodology development.
+
+In practice, the SDR system is organized around a small set of linked objects:
+- Cases - concrete scenarios encountered during pilot development.
+- Experiments: controlled tests run on cases, including any experiment-specific method deviations.
+- Issues: observed failures or roadblocks.
+- Decisions: scoped questions with explicit alternatives and a current selection.
+- Decision Register: the current methodology snapshot at a given time.
+
+In this project, SDR was used in a consistent operational loop.
+1. Each new pilot location or edge scenario was first added as a case (for example, the stream-order-mismatch confluence case).
+2. Separately and independently potential design choices were added as decisions with explicit alternatives (for example, what should be geometry and location of input boundary conditions).
+3. Targeted experiments were developed and ran on those cases
+4. Issues that were observed during experiments were documented as evidence (for example, underpredicted WSEL near tie-ins)
+5. Based on the issues observed decision choices were updated accordingly.
+6. When evidence changed a decision, the Decision Register was updated to represent the current methodology baseline.
+
+This workflow reduced repeated loops, made edge-case handling systematic, and kept methodology changes traceable.
+
+SDR is implemented in a dedicated repository and is actively used by engineers as the primary method-refinement workspace (`https://github.com/NGWPC/twod-fim-knowledge-base/tree/main/system-decision-record`). Beyond immediate decision support, this is expected to materially improve onboarding and external technical review because the reasoning trail is explicit and auditable.
+
+The next subsections, **Pilot Cases** and **Key Decisions for Automation**, is a narrative summary of the current Test Cases and Decision Register state and the evidence patterns that led to these decisions.
 
 ### Glossary
 Terminology used in this report follows SDR glossary definitions to keep implementation and documentation aligned. In particular, the workflow distinguishes terminal reaches, lake/coastal reaches, headwater reaches, upstream mainstem reaches, and stage transfer lines (STLs), because these terms directly control boundary-condition logic and run sequencing.
