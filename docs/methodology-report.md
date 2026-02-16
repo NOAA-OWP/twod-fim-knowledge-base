@@ -86,134 +86,147 @@ The framework is intentionally implementation agnostic; any hydraulic model or a
 The framework is also flexible about internal model details. For example, DEM conditioning or sub‑grid parameterization can be applied within an individual reach model without changing how the broader system functions. This creates a path for regional experts (e.g., RFCs) to improve reach models in their areas while remaining interoperable with the national library. Realizing this at scale will require governance, QA/QC, and cloud‑infrastructure design, which is beyond the scope of the current work.
 
 ## Methodology Development
-We began with the expectation that automated creation of 2D models with information transfer between connected reaches would require many interdependent decisions. Several brain storming meetings were held and some testing was also performed across deifferent components that would be required to built together a comprehensive approach.
+The primary goal of Phase 1 was to define a defensible, automatable methodology for reach-based 2D FIM library development. This phase was not intended to produce large-scale libraries or automation pipeline. Instead, it was intended to establish a coherent technical foundation that could be implemented, tested, reviewed, and refined before broader deployment.
 
-Our initial methodology was intentionally loose, focused on producing workable models quickly so we could observe failures and iterate. As pilot work progressed, we encountered cyclic decision-making where one choice would improve one case but worsen another. To break that cycle, we implemented SDR (described later in this section) and documented each decision with evidence, enabling us to converge on a defensible methodology while retaining alternatives for future refinement.
+Methodology development was carried out as an iterative, evidence-driven process. Engineering discussions were used to frame initial options, and early pilot runs were then used to establish a baseline configuration and identify where that baseline failed under different hydraulic settings. To support this work, lightweight internal tools were developed (described later in the Tooling subsection) and used throughout testing to make setup and comparison more repeatable. As testing expanded, cyclic decision patterns emerged, where choices that improved one case degraded another. To manage that, decision tracking was formalized through System Decision Records (SDR), which preserved decision evolution and rationale and made it easier to revisit why specific design choices were made.
 
+The methodology is still evolving and is expected to continue changing as automation advances and additional roadblocks are discovered. At the same time, it has now been tested as far as reasonably possible without full automation. Because the methodology was designed with automation as a central requirement, full automation should also serve as the next major stress test of the approach.
 
+The emphasis in this phase was intentionally weighted toward automation readiness rather than maximum local accuracy. For that reason, calibration of individual models was not included in scope and should be treated as future work (other limitations and challenges are discussed in a later section).This emphasis reflects operational reality. The primary objective of forecast mapping is reliable capture of inundation patterns at large scale, with the understanding that some depth and extent error will remain. In addition, uncertainty from upstream meteorological and hydrological components in the modeling chain limits the practical value of pursuing very high precision in the mapping step alone. The methodology is therefore framed to balance physical realism with automation feasibility.
 
-The sections below describe the current methodology inputs and tools, followed by a narrative of how key decisions evolved.
+The subsections below describe the source datasets and derived inputs used to build models, the tooling that supported development, and the candidate 2D hydraulic models considered for the task at hand, followed by the key methodology decisions and the evidence used to support each one.
 
-### Input Data
-Topography is sourced from USGS 3DEP and resampled to 10 m resolution. Surface roughness is sourced from MRLC NLCD and converted to Manning’s n using a USACE-derived lookup table. Reach geometry and connectivity are based on the NWM hydrofabric. Pilot discharge inputs are derived from USGS gages and StreamStats; production runs will use NWM discharges.
+### Source Data and Derived Inputs
+Source data is the first place to start in this methodology because all downstream modeling decisions (domain setup, boundary-condition behavior, and library quality) are constrained by the consistency and resolution of the input datasets. For current pilots, topography is sourced from USGS 3DEP and resampled to 10 m, surface roughness is derived from MRLC NLCD, and reach geometry/connectivity is sourced from the NHF (NextGen HydroFabric). Pilot discharge inputs were pulled from USGS gages and StreamStats to accelerate testing; production implementation is expected to use NWM retrospective analysis AEP (Annual Exceedance Probability) flows.
 
-[Placeholder: table listing datasets, versions, and processing steps.]
+For roughness conversion, Table 1 lists the selected NLCD-to-Manning's n lookup, derived from USACE HEC-RAS guidance (U.S. Army Corps of Engineers, n.d.).
+
+**Table 1. NLCD land-cover values to Manning's n roughness lookup**
+
+| NLCD Value | NLCD Class | Manning's n |
+| --- | --- | --- |
+| 11 | Open Water | 0.04 |
+| 21 | Developed, Open Space | 0.04 |
+| 22 | Developed, Low Intensity | 0.10 |
+| 23 | Developed, Medium Intensity | 0.08 |
+| 24 | Developed, High Intensity | 0.15 |
+| 31 | Barren Land | 0.025 |
+| 41 | Deciduous Forest | 0.16 |
+| 42 | Evergreen Forest | 0.16 |
+| 43 | Mixed Forest | 0.16 |
+| 52 | Shrub/Scrub | 0.10 |
+| 71 | Grassland/Herbaceous | 0.035 |
+| 81 | Pasture/Hay | 0.03 |
+| 82 | Cultivated Crops | 0.035 |
+| 90 | Woody Wetlands | 0.12 |
+| 95 | Emergent Herbaceous Wetlands | 0.07 |
 
 ### 2D Model Selection
-Model selection is pending. We conducted a scoping survey to evaluate candidate 2D models against factors that matter for national‑scale automation: equations solved, grid/mesh approach, automation readiness, CPU/GPU performance, Linux and container support, checkpointing/hot‑start, boundary condition flexibility, output availability, maturity, documentation, and licensing.
+An automated 2D based FIM library development pipeline will be highly dependent on the underlying 2D hydrodynamic model, so an evaluation of available 2D hydrodynamic models was necessary to gauge if these models satisfy the our practical requirements. As mentioned earlier the abstract conceptual modeling framework is intentionally model agnostic, but any concrete implementation of this framework through an automated pipeline will be dependent on one particular 2D hydrodynamic model.
 
-This methodology is intentionally model‑agnostic at this stage. LISFLOOD‑FP, TRITON, and SFINCS remain active candidates, and the selection will be made after focused performance and cost testing on our target hardware. The current work should be treated as a pilot; before large‑scale production, a separate effort is needed to benchmark speed, stability, and cost for all three models in a prototype HUC6‑scale area.
+For this reason, we did a scoping study to establish an evaluation framework and narrow candidates based on criteria that matter for large scale automation: governing equations, grid/mesh paradigm, setup automation burden, CPU/GPU performance, Linux and container support, checkpointing/hot-start support, boundary-condition flexibility, output structure, maturity, documentation quality, and licensing constraints.
 
-#### Shortlist (continuing examination)
-**LISFLOOD‑FP** is attractive for national automation because it is fast, GPU‑accelerated for select solvers (ACC, FV1, DG2), well documented, and widely used in the literature. It supports checkpointing and exports WSE and velocity grids, which align with our library workflow. A key consideration is that some solvers rely on Manning‑based formulations rather than full shallow‑water equations, and GPU support is solver‑specific.  
+Table 2 lists the summary results of the survey of 2D models and the model selection decision basis
 
-**TRITON** solves the full shallow‑water equations (ARoe solver) and shows strong GPU performance when available. It supports checkpointing and exports depth and velocity fields. The tradeoff is maturity: CPU‑only performance is weaker, and the toolchain and documentation are still evolving.  
+**Table 2: 2D model survey summary**
+
+| Model | Equations / Approach | Grid / Automation | Performance | Linux / Container | Boundary Conditions & IO | Status / Rationale |
+| --- | --- | --- | --- | --- | --- | --- |
+| LISFLOOD-FP | Multiple solvers; some solve shallow-water equations; some use Manning-based formulations | Gridded; automation feasible; broad community patterns | Fast; GPU support for ACC, FV1, DG2 | Linux-friendly; containerizable | Supports hydrograph, fixed inflow, free-flow (valley slope), constant or time-varying WSE; exports WSE and velocity grids; checkpointing | Continue evaluation; strong literature and tooling, good performance |
+| TRITON | Full shallow-water equations (ARoe solver) | Gridded; automation feasible; maturity still developing | Very fast on GPU; weaker on CPU | Linux-friendly; containerizable | Supports hydrograph, free flow, constant WSE, normal slope, Froude number; exports depth/velocity; checkpointing | Continue evaluation; strong physics and GPU speed, less mature |
+| SFINCS | Shallow-water equations with simplified formulation (convective acceleration ignored) | Gridded; HydroMT provides automated setup | Fast for large domains; performance depends on setup | Linux-friendly; containerizable | Boundary conditions supported via HydroMT workflows; standard raster outputs | Secondary candidate; strong automation, needs validation for reach-based rivers |
+| TELEMAC-2D | Shallow-water equations | Mesh-based; may require code-level adjustments | Reported fast; widely used in EU | Linux-capable; containerization possible but non-trivial | Standard hydraulic BCs; IO requires integration work | Not prioritized; higher automation burden |
+| HEC-RAS 2D | Shallow-water equations with sub-grid approach | Mesh-based; GUI-centric | Good for engineering studies; automation burden high | Windows-centric; Linux uncertain | Rich BCs, but IO complex | Removed; automation and data handling risks |
+| RAS 2025 (alpha) | Shallow-water equations | Mesh-based; API not released | Unknown stability | Linux/API uncertain | Unknown | Removed; timeline risk |
+| FastFlood | GIS-hydraulic hybrid | Gridded | Very fast (per literature) | Unknown | Outputs not aligned with hydrodynamic needs | Removed; not a 2D hydrodynamic model |
+| PNNL Lagrangian | Novel research method | Unclear | Supposedly fast | Unclear | Unclear | Removed; research-grade |
+| MIKE21 / FLO-2D / Delft3D / TUFLOW 3D | Hydrodynamic models | Mixed | Strong but commercial | Licensing constraints | Proprietary tooling | Removed; licensing incompatible |
 
 
-[Wasn't there a big reason for TRITON not being there]
+Based on this survey exercise, LISFLOOD-FP, TRITON, and SFINCS remain active candidates. Although final selection is planned after focused benchmark testing of speed, stability, and feature maturity, the pilot development and automation research still required us to land on one model, so that we can develop our tooling around it and stay focus on developing methodology and not on details of different models.
 
-#### Secondary candidates 
-**SFINCS** solves the shallow‑water equations with a simplified formulation (convective acceleration ignored) and has a strong automation pathway via HydroMT, which is attractive for reproducibility and rapid setup. It remains a secondary candidate pending validation for reach‑based riverine use cases.  
+Our initial research showed LISFLOOD-FP to be best candidate and hence we decided to use LISFLOOD-FP for our tooling development. Since our choice of going through with using LISFLOOD-FP we have learned more about SFINCS and the active development that is going on in its ecosystem, this makes SFINCS a very potent candidate and in the future we plan to explore SFINCS further. TRITON as of now is least favorable candidate, mainly because (to do:). 
 
+HEC-RAS faces several challenges when it comes to large-scale cloud-based modeling backed by automation due to:
+-   Dependency on Windows-based operations
+-   Mesh tooling and instability
+-   Mapping related to sub grid computational approach
+-   Complicated data structures and storage inefficiencies
 
-[HydroMT work form Scott]
+One of the primary limitations of HEC-RAS for use in the cloud is its reliance on a Windows-based graphical user interface (GUI) for model development. This dependency requires the use of Windows OS components in any automation system, which complicates cloud environments predominantly using (containerized) Linux systems. Although solutions
+like Wine exist to emulate Windows applications on Linux, attempts to port HEC-RAS using Wine have had very limited success, marked by instability and unreliable performance, making it a poor choice. Likewise, mapping operations in HEC-RAS must be conducted within a Windows environment, extending the Windows OS dependency to include post processing.
 
-#### Removed from consideration for this phase
-**HEC‑RAS 2D** is removed due to automation risks tied to GUI‑centric workflows, mesh stability, sub‑grid artifacts, and complex data handling. RAS 2025 remains too uncertain in timeline and stability for this project phase. FastFlood is not a hydrodynamic model and does not meet the physical requirements. The PNNL Lagrangian model is research‑grade and not production ready. Commercial models (MIKE21, FLO‑2D, Delft3D, TUFLOW 3D) are excluded due to licensing and deployment constraints incompatible with national automation.
+Another significant hurdle is a lack of automated mesh tools available outside the HEC-RAS GUI. Mesh generation and refinement are crucial steps in hydraulic modeling, and the computations are highly sensitive to mesh-related issues. Mesh instability is a commonly known issue with HEC-RAS models, requiring manual debugging, which can be time-consuming and labor-intensive. The degree to which manual intervention would be required adds significant risk to project delivery.
 
-Final model selection will be based on pilot benchmarks for speed, stability, automation effort, output fidelity, and cost.
+Computationally, HEC-RAS utilizes a sub grid approach, which involves subdividing computational cells into smaller elements to capture detailed hydraulic information and reduce simulation time through caching of complex cell properties. This computational approach creates challenges from traditional finite volume methods in map production, as volume accounting is more complex. As a result, there are a handful of known issues with flood rasters created using HEC-RAS software, including cupping and disconnected hydraulic reaches, which would require an additional post-processing step prior to delivery.
 
-**Table: 2D model survey summary (decision basis)**  
+With respect to data, the complexity of HEC-RAS\'s data structures poses significant challenges for automation. The software uses a variety of file formats, including text files, binary files, HDF files, and DSS files. This dependency complicates data management and automation, as different tools and processes are required to handle each file type. A result of this approach is data duplication across files: resulting in unnecessary redundancy that increases the storage requirements for simulations, inflating data size and complicating data handling in the cloud.
 
-| Model                                 | Equations / Approach                                                                      | Grid / Automation                                       | Performance                                          | Linux / Container                                        | Boundary Conditions & IO                                                                                                                 | Status / Rationale                                                              |
-| ------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| LISFLOOD‑FP                           | Multiple solvers; some solve shallow‑water equations; some use Manning‑based formulations | Gridded; automation feasible; broad community patterns  | Fast; GPU support for ACC, FV1, DG2                  | Linux‑friendly; containerizable                          | Supports hydrograph, fixed inflow, free‑flow (valley slope), constant or time‑varying WSE; exports WSE and velocity grids; checkpointing | Continue evaluation; strong literature and tooling, good performance            |
-| TRITON                                | Full shallow‑water equations (ARoe solver)                                                | Gridded; automation feasible; maturity still developing | Very fast on GPU; weaker on CPU                      | Linux‑friendly; containerizable                          | Supports hydrograph, free flow, constant WSE, normal slope, Froude number; exports depth/velocity; checkpointing                         | Continue evaluation; strong physics and GPU speed, less mature                  |
-| SFINCS                                | Shallow‑water equations with simplified formulation (convective acceleration ignored)     | Gridded; HydroMT provides automated setup               | Fast for large domains; performance depends on setup | Linux‑friendly; containerizable                          | Boundary conditions supported via HydroMT workflows; standard raster outputs                                                             | Secondary candidate; strong automation, needs validation for reach‑based rivers |
-| TELEMAC‑2D                            | Shallow‑water equations                                                                   | Mesh‑based; may require code‑level adjustments          | Reported fast; widely used in EU                     | Linux‑capable; containerization possible but non‑trivial | Standard hydraulic BCs; IO requires integration work                                                                                     | Not prioritized; higher automation burden                                       |
-| HEC‑RAS 2D                            | Shallow‑water equations with sub‑grid approach                                            | Mesh‑based; GUI‑centric                                 | Good for engineering studies; automation burden high | Windows‑centric; Linux uncertain                         | Rich BCs, but IO complex                                                                                                                 | Removed; automation and data handling risks                                     |
-| RAS 2025 (alpha)                      | Shallow‑water equations                                                                   | Mesh‑based; API not released                            | Unknown stability                                    | Linux/API uncertain                                      | Unknown                                                                                                                                  | Removed; timeline risk                                                          |
-| FastFlood                             | GIS‑hydraulic hybrid                                                                      | Gridded                                                 | Very fast (per literature)                           | Unknown                                                  | Outputs not aligned with hydrodynamic needs                                                                                              | Removed; not a 2D hydrodynamic model                                            |
-| PNNL Lagrangian                       | Novel research method                                                                     | Unclear                                                 | Supposedly fast                                      | Unclear                                                  | Unclear                                                                                                                                  | Removed; research‑grade                                                         |
-| MIKE21 / FLO‑2D / Delft3D / TUFLOW 3D | Hydrodynamic models                                                                       | Mixed                                                   | Strong but commercial                                | Licensing constraints                                    | Proprietary tooling                                                                                                                      | Removed; licensing incompatible                                                 |
+In September of 2024, USACE released the alpha version of a major update to HEC-RAS (RAS 2025). According to release notes and the HEC newsletter, the new version of software has been designed to incorporate an API and offer a Linux build for headless and containerized operations. At the time of the writing of this narrative, these features have not been published, and the Beta version has likewise not been released. While this version promises to overcome some of the cloud deployment issues noted above, it does not address the mesh, sub grid, and data issues identified as areas of risk for use in this project.
 
-[Placeholder: final model selection once pilot benchmarks are complete.]
-
-**HEC‑RAS 2D: Rationale for Removal**
-HEC‑RAS remains an industry‑standard tool with a mature user base, but several characteristics make it a poor fit for national‑scale, automated, cloud‑native production. First, model development and mapping workflows are tightly coupled to a Windows‑based GUI. This introduces a hard dependency on Windows in an otherwise Linux‑native, containerized pipeline. Attempts to run HEC‑RAS under emulation (e.g., Wine) have been unreliable and are not suitable for production automation.  
-
-Second, mesh generation and refinement are not readily automatable outside the GUI. Mesh sensitivity is a common source of instability in HEC‑RAS models and typically requires manual troubleshooting. At national scale, this creates a high operational burden and increases the risk of inconsistent outputs.  
-
-Third, HEC‑RAS uses a sub‑grid formulation that complicates volume accounting and can introduce known artifacts in derived flood rasters (e.g., cupping, disconnected hydraulic reaches). These issues would require additional post‑processing and quality control steps, which adds complexity to an automated pipeline.  
-
-Finally, HEC‑RAS data management is complex: the software uses a mix of text, binary, HDF, and DSS formats, often with duplicated data across files. This makes automation, storage, and reproducibility more difficult at scale.  
-
-USACE announced an alpha “RAS 2025” release promising a Linux build and API for headless operation, but those capabilities are not yet available or stable enough to de‑risk this project timeline. Even if released, the mesh, sub‑grid, and data‑format concerns would remain. For these reasons, HEC‑RAS was removed from consideration for this phase.
+Collectively, these issues highlight the challenges HEC-RAS faces in transitioning to large-scale cloud-based modeling backed by automation.
 
 ### Tooling
-Pilot work used a lightweight automated tool to generate model domains, boundary condition geometries, and raster inputs. This tool accelerated iteration, made model construction repeatable, and exposed design requirements for a production pipeline. A production-ready toolchain will be developed after methodology approval and prototype validation.
+Pilot work used a lightweight automation toolchain to generate model domains, stage-transfer geometry, boundary-condition geometry, and raster inputs. The toolchain was deliberately minimal: it was designed to accelerate iteration and enforce repeatable setup patterns while methodology questions were still open. This avoided overbuilding production software before decision stability was established.
 
+From an automation perspective, this phase also confirmed a practical distinction between 1D and 2D workflows. In 1D, cross-section placement and refinement at hydraulically sensitive locations remain highly judgment-intensive. In 2D, that effort shifts toward grid/domain definition, boundary-condition placement, and terrain conditioning. The burden does not disappear, but it is more rule-driven and therefore better suited to scalable automation once decision rules are mature.
 
-“From an automation standpoint, 2D modeling avoids a major 1D bottleneck: the placement and refinement of cross‑sections at hydraulically significant locations. HEC‑RAS guidance makes clear that cross‑sections must be positioned near structures, slope changes, and junctions—decisions that remain judgment‑intensive even when terrain‑extraction tools are used. In contrast, 2D setup replaces cross‑section placement with repeatable grid and domain rules, which are more amenable to automation. That said, the automation burden does not disappear; it shifts to grid resolution, domain extent, boundary condition placement, and DEM conditioning.” (hec.usace.army.mil)
-
-
-For 2D, there is published evidence of automated model setup at scale (e.g., HydroMT‑SFINCS global setup in NHESS), which supports the idea that 2D automation can be more straightforward in geometry definition—but it shifts effort to grid definition, domain trimming, boundary conditions, and data conditioning (Eilander et al., 2023b).
+Published large-scale automation efforts (for example, HydroMT-SFINCS workflows in NHESS) support this direction and provide external precedent that 2D setup can be industrialized when preprocessing rules are explicit and reproducible.
 
 ![Pilot tooling landing page / workflow overview](methodology-report/image7.png)
 *Figure TBD. Pilot tooling used to automate model construction and review.*
 
-... To be expanded
 ### System Decision Records (SDR)
-SDR is used to preserve decision evolution and evidence. Each decision is framed as a narrow, testable question with explicit alternatives. Cases and experiments provide evidence to accept, reject, or revise alternatives. This enables us to avoid repeating rejected ideas without new evidence while still keeping alternatives visible for future reconsideration.
+SDR provides the governance layer for methodology development. Each decision is framed as a narrow technical question, alternatives are explicitly defined, and experiments/cases are linked as evidence for selection status. This turns method development into a traceable engineering process rather than ad hoc iteration.
+
+The practical value has been significant in three ways. First, SDR preserves reasoning so earlier choices do not need to be rediscovered when team members rotate or when similar issues reappear. Second, it enables structured revision: previously rejected alternatives can be revisited when new evidence exists, without erasing historical context. Third, it keeps open decisions visible, which helps prioritize pilot design and prevents hidden assumptions from entering automation logic.
 
 ### Glossary
-Key terms are defined in the SDR glossary and are summarized here for report consistency. These include terminal reaches, lake/coastal reaches, headwater reaches, reach start and outlet, common outlet reaches, connected reaches, and adjacent reaches.
+Terminology used in this report follows SDR glossary definitions to keep implementation and documentation aligned. In particular, the workflow distinguishes terminal reaches, lake/coastal reaches, headwater reaches, upstream mainstem reaches, and stage transfer lines (STLs), because these terms directly control boundary-condition logic and run sequencing.
 
-Link to appendix.
 ### Pilot Cases
-We selected pilot locations to cover a wide range of physiographic and hydraulic conditions we expected to stress the method: small rural rivers, steep headwaters, urban corridors with structures, large rivers with very wide floodplains, desert washes, lake/terminal reaches, and coastal settings. These pilots were complemented by targeted SDR cases chosen specifically because we expected to encounter known issues (e.g., backwater at confluences, culvert obstructions, inflow artifacts, and domain truncation). The appendix summarizes each case in a consistent format and provides the basis for the decisions described below.
+Pilot locations were selected to stress the methodology across contrasting hydraulic and physiographic conditions rather than to maximize geographic count. The set includes small rural systems, steep headwaters, urban/structure-influenced corridors, very wide floodplains, arid channels, and lake/coastal terminal settings. Targeted SDR cases were then used to isolate known failure modes such as backwater mismatch at confluences, edge leakage, inflow artifacts, culvert-related blockage, and domain truncation.
+
+This case design was intentional: the goal was to expose where generalized automation rules break and to use those failures to tighten decision logic. The appendix provides case-by-case summaries and figure evidence.
 
 ![Pilot site locations](methodology-report/image6.jpeg)
 *Figure TBD. Locations of pilot study sites.*
 
-
-... to be expanded
 ### Key Decisions for Automation
-We began with a simple, pragmatic approach: model each reach in isolation, apply basic boundary conditions, and rely on downstream-to-upstream sequencing to propagate backwater. As soon as we tested this in pilot sites, we encountered systematic issues. The narrative below describes the most important decisions and how evidence led to our current choices. These decisions are presented as isolated questions, but together they form the methodology described in later sections.
+Initial pilots used a simple baseline: model each reach independently, apply straightforward boundary conditions, and rely on downstream-to-upstream sequencing for hydraulic coupling. That baseline exposed predictable weaknesses. The decisions below summarize how those weaknesses were addressed and how they now shape the methodology.
 
-**Do we need downstream stage transfer (KWSE), or can we rely on normal depth?**
-Our early tests compared runs that used only normal-depth boundaries at the downstream end against runs that used stage transfer from the downstream model. In a confluence with stream-order mismatch, the normal-depth runs produced lower water surface elevations near the downstream tie-in and underrepresented backwater. Stage transfer produced a closer tie-in and more realistic flood extents upstream. Based on this, we currently apply downstream stage transfer for all reaches, including confluences and mainstem-tributary interactions.
+#### Reach Coupling and Stage Transfer
+The first major decision was whether downstream stage transfer (KWSE-informed coupling) was necessary or whether normal-depth downstream boundaries were sufficient. In confluences and stream-order mismatch settings, normal-depth-only runs consistently underpredicted downstream water-surface elevation and reduced upstream inundation extent. Stage-transfer-informed runs produced better tie-in behavior and more realistic backwater response.
 
-This approach aligns with the Flows2FIM operational algorithm, which traverses the NWM network downstream‑to‑upstream and propagates downstream WSELs as boundary conditions. Preserving this sequential propagation is essential for backwater‑sensitive settings and is a core requirement for interoperability with the library‑based workflow.
-
-Operationally, this implies a two‑pass strategy similar to Ripple1D: normal‑depth runs can be used to establish rating curves and baseline conditions, followed by KWSE‑informed runs to produce the depth grids used in the library. That separation keeps the lookup logic consistent while ensuring downstream boundary conditions are explicitly represented in the final maps.
+As a result, downstream stage transfer is currently treated as a default requirement across reaches, not a special-case exception. This aligns with Flows2FIM’s downstream-to-upstream traversal logic and preserves compatibility with library-based operational assembly.
 
 ![KWSE vs normal depth comparison at a confluence](methodology-report/Case-001_Fig-002.png)
 *Figure TBD. KWSE vs normal-depth comparison showing lower WSEL near tie-in without downstream stage transfer.*
 
-**Where should edge boundary conditions allow flow to leave the domain?**
-We initially applied normal depth along all model edges. This caused water to leave the domain at non-outlet locations, especially where upstream tributaries intersected the domain boundary. This broke mass balance and produced unnatural inundation. We now apply normal-depth boundaries only to edge cells that intersect downstream flood extents, and we use the reach centerline slope for those cells. This change reduced non-physical outflows while still allowing discharge to exit the domain.
+#### Domain Edge and Boundary-Control Strategy
+Applying normal depth across all perimeter edges was tested early and consistently created non-physical losses where upstream tributaries or side boundaries intersected the domain edge. The current approach restricts normal-depth outflow treatment to edge cells hydraulically informed by downstream flooding and uses reach-centerline slope for those cells. This materially reduced leakage at non-outlet locations.
+
+For lake and coastal terminal settings, normal-depth-only boundaries also produced pooling artifacts. Current handling uses waterbody-informed edge treatment and stage-transfer-aware downstream control, with STL geometry tied to domain-waterbody intersection. Reach classification rules for lake/coastal tagging remain open.
 
 ![Water leaving the domain at non-outlet locations under normal-depth edge conditions](methodology-report/Case-001_Fig-003.png)
-*Figure TBD. Water leaving the domain at non‑outlet locations when normal depth is applied at all edges.*
-
-**How should lake and coastal reaches be handled?**
-For terminal reaches discharging to lakes or the coast, we tested low-slope normal-depth boundaries and found that they caused pooling at the downstream end. Using downstream stage transfer plus reach slope avoided this pooling and provided a more stable tie-in. We now treat lake/coastal reaches with waterbody-informed edge handling and define their stage transfer line where the model domain intersects the waterbody polygon. Criteria for classifying lake/coastal reaches remain an open item.
+*Figure TBD. Water leaving the domain at non-outlet locations when normal depth is applied at all edges.*
 
 ![Lake reach normal depth run](methodology-report/Case-002_Fig-002.png)
-*Figure TBD. Lake reach behavior under normal‑depth boundary conditions.*
+*Figure TBD. Lake reach behavior under normal-depth boundary conditions.*
 
 ![Lake reach KWSE run](methodology-report/Case-002_Fig-003.png)
 *Figure TBD. Lake reach behavior under downstream stage transfer.*
 
-**Where should the stage transfer line (STL) be placed?**
-We compared applying stage transfer at the model boundary versus using a line inside the domain. Boundary-based transfer can cause abrupt width changes when downstream flow is much larger, while a line-based transfer improves continuity. We currently use an STL derived from the first downstream WSEL contour and keep one STL per reach (derived from a coarse model) for all runs. Flat reaches and inflow-adjacent anomalies remain areas for refinement.
+#### Stage Transfer Line (STL) Placement
+Tests showed that applying stage transfer directly at the outer domain edge can create abrupt hydraulic behavior where downstream geometry or flow regime changes quickly. Using an internal STL derived from downstream WSEL contours produced more stable transitions. The current selection is one STL per reach, derived from coarse-model guidance and reused across runs for that reach.
 
-![STL placement alternatives](methodology-report/DR-024---FIG-002.png)
+This simplifies automation and indexing, but it introduces residual risk in highly flat or hydraulically complex reaches where one STL may not represent all flow regimes equally well.
+
+![STL placement alternatives](methodology-report/stl-placement-alternatives.png)
 *Figure TBD. Alternative STL placement geometry to reduce WSEL anomalies.*
 
-**How should the model domain be defined and expanded?**
-We initially used reach divides to define model domains. Pilot tests showed that reach divides can be too narrow, truncating flood extents and cutting off inundation at domain edges. We now build domains from coarse-model extents or buffered reach geometry and apply elevation-informed expansion until edge flooding is limited to elevations below the reach outlet. This reduces truncation while keeping domains efficient.
+#### Domain Construction and Expansion
+Reach-divide-only domains were frequently too narrow, causing floodplain truncation and edge cutoffs. The current method starts from buffered/coarse-informed geometry and then applies elevation-informed expansion rules until edge flooding is limited relative to outlet elevation constraints. This improved continuity without defaulting to excessively large domains.
 
 ![Example of domain truncation](methodology-report/Case-004_FIG-001.png)
 *Figure TBD. Flood extent truncated at domain edge when using reach-divide domains.*
@@ -221,8 +234,10 @@ We initially used reach divides to define model domains. Pilot tests showed that
 ![Comparison to benchmark FIM](methodology-report/Case-004_FIG-002.png)
 *Figure TBD. Comparison to benchmark FIM showing edge truncation.*
 
-**What inflow geometry should be used?**
-Point inflows at the reach start caused “bullseye” artifacts in water-surface elevation contours. Inflow lines reduced these artifacts and produced smoother WSEL surfaces. We now use a perpendicular inflow line on the upstream mainstem, 100 m wide and offset 0.25 of the upstream reach length. For headwater reaches, a point inflow remains under review because it conflicts with observed artifacts in pilot tests.
+#### Inflow Representation and Special Reach Handling
+Point inflows at the reach start produced recurring bullseye artifacts in WSEL contours. A perpendicular inflow line on the upstream mainstem reduced these artifacts and produced smoother fields. Current defaults are a 100 m inflow line width with a 0.25 upstream-reach-length offset. Headwater treatment remains a conditional area where point inflow may still be used but requires additional constraints.
+
+Short and hydraulically flat reaches were also problematic when modeled strictly one-by-one. Current practice merges selected continuous short reaches (based on stream order, drainage-area difference, and length thresholds) to avoid artificial segmentation effects. Flat-reach handling is still provisional and requires further rule development.
 
 ![WSEL artifacts from point inflow](methodology-report/Case-006_FIG-002.png)
 *Figure TBD. Point inflow producing WSEL “bullseye” artifacts.*
@@ -230,26 +245,23 @@ Point inflows at the reach start caused “bullseye” artifacts in water-surfac
 ![Reduced artifacts with line inflow](methodology-report/Case-006_FIG-003.png)
 *Figure TBD. Line inflow reduces WSEL artifacts.*
 
-**How should DEM conditioning handle culverts and obstructions?**
-Unmodified DEMs resulted in divergent flowpaths and impounded flow where culverts or small structures were not represented. These artifacts were visible in pilot comparisons and can underpredict downstream flooding. We have rejected a “no conditioning” approach and are evaluating alternatives such as AGREEDEM channel burning, burning streams at roads, breaching flow obstructions, and custom conditioning workflows.
+#### Terrain Conditioning and Hydraulic Realism
+Unconditioned DEMs repeatedly produced divergent flow paths and impoundment around culverts and road crossings that were not hydraulically represented in the terrain. This behavior is severe enough that a no-conditioning approach is not considered viable for production. Alternatives under evaluation include AGREEDEM channel burning, targeted road/culvert burning, and hybrid conditioning workflows.
 
 ![Divergent flowpath due to culvert obstruction](methodology-report/Case-003_FIG-002.png)
 *Figure TBD. Divergent flowpath caused by unburned culverts.*
 
 ![Culvert blocking flow](methodology-report/Case-003_FIG-007.png)
 *Figure TBD. Flow impounded upstream of a culvert/road crossing.*
-**How should composite maps be built?**
-Overlapping reach maps require a consistent compositing strategy. We currently use a pixelwise maximum approach. This choice is robust to overlap, but it can amplify localized artifacts, which reinforces the need to minimize boundary-condition anomalies and inflow artifacts.
 
-**How do we handle short or flat reaches?**
-Short reaches can be inefficient and can distort results when modeled in isolation. We currently merge higher stream-order continuous reaches with negligible drainage-area differences. Flat reaches remain a challenge because they can cause level-pool behavior and unstable stage contours; slope criteria and additional merging rules are under development.
+#### Compositing, Run Control, and Remaining Open Decisions
+For compositing overlapping reach rasters, the current selection is pixelwise maximum depth. This is robust and simple for operational assembly, but it can amplify local artifacts when upstream boundary errors persist.
 
-Experience from Ripple1D conflation also highlights “eclipsed” reach situations where a very short reach falls entirely between cross‑sections (or, in our context, between effective model control points). These cases reinforce the need for reach‑merging and eclipsing rules in the 2D pipeline, especially near confluences and in complex junctions where strict reach‑by‑reach modeling can introduce artificial boundaries.
+Quasi-steady termination criteria are still open and currently treated as a proposed decision. Candidate criteria include combined mass-balance convergence (Qin approximately equal to Qout) and WSEL stabilization across final timesteps.
 
-**How do we determine quasi-steady state?**
-The methodology assumes steady-flow conditions for each run. We are evaluating criteria based on mass balance (Qin ≈ Qout) and WSEL stabilization between time steps. This is an open decision that will be finalized during prototype automation.
+At the time of this report, principal open SDR items include lake/coastal reach classification logic, final DEM-conditioning method, initial-domain rule finalization, and quasi-steady stopping criteria. These are expected to be resolved during prototype automation and are the main prerequisites for moving from methodology definition to production-scale implementation.
 
-Together, these decisions define the current methodology and inform the proposed automation workflow described below.
+Together, these decisions define the current method baseline and directly inform the proposed automation workflow in the next section.
 
 ## Proposed Automation Workflow
 This workflow is under development and will be refined as decisions are finalized. It is designed to translate the methodology into a repeatable national-scale pipeline.
@@ -355,6 +367,8 @@ NextGen Water Prediction Capabilities (NGWPC) (n.d.-a), Ripple1D (software), Git
 NextGen Water Prediction Capabilities (NGWPC) (n.d.-b), flows2fim (software), GitHub repository, https://github.com/NGWPC/flows2fim (accessed 12 Feb 2026).
 
 Sanders, B. F., O. E. J. Wing, and P. D. Bates (2024), Flooding is not like filling a bath, *Earth’s Future*, 12(12), e2024EF005164, https://doi.org/10.1029/2024EF005164.
+
+U.S. Army Corps of Engineers (USACE) (n.d.), HEC-RAS 2D User’s Manual: Creating land cover, Manning’s n values, and impervious layers, https://www.hec.usace.army.mil/confluence/rasdocs/r2dum/6.6/developing-a-terrain-model-and-geospatial-layers/creating-land-cover-mannings-n-values-and-impervious-layers (accessed 15 Feb 2026).
 
 U.S. Geological Survey (n.d.-a), Flood Inundation Mapping (FIM) Program, https://www.usgs.gov/mission-areas/water-resources/science/flood-inundation-mapping-fim-program (accessed 12 Feb 2026).
 
