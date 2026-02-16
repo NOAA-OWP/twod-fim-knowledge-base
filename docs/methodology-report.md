@@ -128,7 +128,7 @@ For this reason, we did a scoping study to establish an evaluation framework and
 
 Table 2 lists the summary results of the survey of 2D models and the model selection decision basis
 
-**Table 2: 2D model survey summary**
+**Table 2: 2D models survey summary**
 
 | Model | Equations / Approach | Grid / Automation | Performance | Linux / Container | Boundary Conditions & IO | Status / Rationale |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -181,7 +181,7 @@ Published large-scale automation efforts (for example, HydroMT-SFINCS workflows 
 ### System Decision Records (SDR)
 During initial pilot development, the WebApp made it possible to run many more cases quickly, and the main bottleneck shifted from model setup to decision governance: avoiding cycles on repeated questions and keeping rationale tied to evidence as edge cases accumulated.
 
-To address that bottleneck and systemize many smaller decisions that together form the overall methodology, we adopted System Decision Records (SDR), a structured decision-management framework adapted from Architecture Decision Records (ADR) that captures decision evolution, alternatives, and evidence rather than only the final choice. In this project, SDR is used as the governance mechanism for methodology development.
+To address that bottleneck and systemize many smaller decisions that together form the overall methodology, we adopted System Decision Records (SDR), a structured decision-management framework adapted from Architecture Decision Records (ADR) that captures decision evolution, alternatives, and evidence rather than only the final choice (Siddiqui, n.d.). In this project, SDR is used as the governance mechanism for methodology development.
 
 In practice, the SDR system is organized around a small set of linked objects:
 - Cases - concrete scenarios encountered during pilot development.
@@ -190,7 +190,7 @@ In practice, the SDR system is organized around a small set of linked objects:
 - Decisions: scoped questions with explicit alternatives and a current selection.
 - Decision Register: the current methodology snapshot at a given time.
 
-In this project, SDR was used in a consistent operational loop.
+Once SDR was implemented, it was used in a consistent operational loop for methodology development.
 1. Each new pilot location or edge scenario was first added as a case (for example, the stream-order-mismatch confluence case).
 2. Separately and independently potential design choices were added as decisions with explicit alternatives (for example, what should be geometry and location of input boundary conditions).
 3. Targeted experiments were developed and ran on those cases
@@ -205,15 +205,41 @@ SDR is implemented in a dedicated repository and is actively used by engineers a
 The next subsections, **Pilot Cases** and **Key Decisions for Automation**, is a narrative summary of the current Test Cases and Decision Register state and the evidence patterns that led to these decisions.
 
 ### Glossary
-Terminology used in this report follows SDR glossary definitions to keep implementation and documentation aligned. In particular, the workflow distinguishes terminal reaches, lake/coastal reaches, headwater reaches, upstream mainstem reaches, and stage transfer lines (STLs), because these terms directly control boundary-condition logic and run sequencing.
+Terminology used in this report follows definitions provided in 'Appendix B - Glossary' to keep methods, documentation, and figures aligned. In the main report, controlled glossary terms are shown in backticks (for example, `Reach Outlet`, `Headwater Reach`, `Stage Transfer Line`) to indicate they use the appendix definitions.
 
+### Symbology
+The figures in this report use a consistent symbology. This is defined once here to avoid repeating legends in every figure.
+
+\<picture of symbology, might be as a table>
+Figure 7.
 ### Pilot Cases
-Pilot locations were selected to stress the methodology across contrasting hydraulic and physiographic conditions rather than to maximize geographic count. The set includes small rural systems, steep headwaters, urban/structure-influenced corridors, very wide floodplains, arid channels, and lake/coastal terminal settings. Targeted SDR cases were then used to isolate known failure modes such as backwater mismatch at confluences, edge leakage, inflow artifacts, culvert-related blockage, and domain truncation.
+Pilot locations were selected to stress the methodology and different design decisions across contrasting hydraulic and physiographic conditions rather than to maximize geographic count. The set includes small rural systems, steep headwaters, urban/structure-influenced corridors, very wide floodplains, arid channels, different shape confluences or river networks, and lake/coastal terminal settings. The baseline methodology as well targeted deviation experiments were then executed against these cases to discover and isolate failures modes such as WSEL mismatch at tie-ins, edge leakage, inflow artifacts, etc. This is inline with SDR workflow described above.
 
-This case design was intentional: the goal was to expose where generalized automation rules break and to use those failures to tighten decision logic. The appendix provides case-by-case summaries and figure evidence.
+Figure 8 depicts location of all cases. Table 3 provides case number, location, and title for these cases. Appendix C provides full details for each case.
 
-![Pilot site locations](methodology-report/image6.jpeg)
-*Figure TBD. Locations of pilot study sites.*
+*![[Pasted image 20260216133325.png]]Figure 8. Locations of pilot study cases. For full detail about each case refer to Appendix C.
+
+**Table 3. Case Index**
+
+| Case Number | Location | Title |
+| --- | --- | --- |
+| Case-1 | Haddam, CT | Y Shape Confluence with 2 Level Stream Order Difference |
+| Case-2 | Burlington, VT | Lake Reach |
+| Case-3 | Winooski, VT | Small Culverts |
+| Case-4 | Burlington, VT | Model Domain Example |
+| Case-5 | Richmond, VT | Model Domain Example 2 |
+| Case-6 | Springfield, MA | Inflow Boundary Conditions |
+| Case-7 | Binghamton, NY | Complex Semi-urban Confluence Along Low-Gradient River |
+| Case-8 | Rosedale, MS | Very Wide Floodplain |
+| Case-9 | Brinson, GA | Rural Unconfined Farm Fields |
+| Case-10 | Quartz, CO | Steep confined Mountainous Terrain |
+| Case-11 | Trenton, NJ | Large Urban River |
+| Case-12 | Hiko, NV | Desert Wash |
+| Case-13 | Lake Murray, SC | Large Inland Waterbody |
+| Case-14 | Plum Island, MA | Coastal Area |
+| Case-15 | Evansville, IN | Large River |
+
+
 
 ### Key Decisions for Automation
 Initial pilots used a simple baseline: model each reach independently, apply straightforward boundary conditions, and rely on downstream-to-upstream sequencing for hydraulic coupling. That baseline exposed predictable weaknesses. The decisions below summarize how those weaknesses were addressed and how they now shape the methodology.
@@ -391,6 +417,8 @@ NextGen Water Prediction Capabilities (NGWPC) (n.d.-b), flows2fim (software), Gi
 
 Sanders, B. F., O. E. J. Wing, and P. D. Bates (2024), Flooding is not like filling a bath, *Earth’s Future*, 12(12), e2024EF005164, https://doi.org/10.1029/2024EF005164.
 
+Siddiqui, A. R. (n.d.), System Decision Records (SDR), https://ar-siddiqui.github.io/sdr/ (accessed 16 Feb 2026).
+
 U.S. Army Corps of Engineers (USACE) (n.d.), HEC-RAS 2D User’s Manual: Creating land cover, Manning’s n values, and impervious layers, https://www.hec.usace.army.mil/confluence/rasdocs/r2dum/6.6/developing-a-terrain-model-and-geospatial-layers/creating-land-cover-mannings-n-values-and-impervious-layers (accessed 15 Feb 2026).
 
 U.S. Geological Survey (n.d.-a), Flood Inundation Mapping (FIM) Program, https://www.usgs.gov/mission-areas/water-resources/science/flood-inundation-mapping-fim-program (accessed 12 Feb 2026).
@@ -400,245 +428,349 @@ U.S. Geological Survey (n.d.-b), Flood Inundation Mapping Science, https://www.u
 Wing, O. E. J., et al. (2019), A flood inundation forecast of Hurricane Harvey using a continental‑scale 2D hydrodynamic model, *Journal of Hydrology X*, 4, 100039, https://doi.org/10.1016/j.hydroa.2019.100039.
 
 ## Appendices
-### Test Cases
-The cases below include initial pilot sites and targeted SDR cases. Each case was selected for unique characteristics or known issues. All cases follow the same format to support consistent interpretation and future updates.
 
-#### Case A — Spring Creek near Iron City, GA (Pilot)
-**Description**: Small rivers in rural agriculture, unconfined corridor, and confluences.  
-**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder]. Gages: USGS 02357000 (mainstem), StreamStats (tributary).  
-**Setting**:  
-![Spring Creek pilot site map](methodology-report/image8.png)
-*Figure TBD. Spring Creek pilot site overview.*  
-![Spring Creek reach layout](methodology-report/image9.jpeg)
-*Figure TBD. Reach layout for Spring Creek pilot.*  
-**What Was Performed**: Automated model build and manual review of STL and domain coverage.  
-**What Was Discovered**: Transfer lines and domains did not always span the lateral floodplain; extensions reduced boundary ponding.  
-**Issues Encountered**: Truncated flood extents at domain edges; STL coverage gaps in confluence areas.
+### Appendix A.
 
-![Extended domain and STL example](methodology-report/image10.png)
-*Figure TBD. Example of domain/STL extension to cover lateral floodplain.*  
-![Transfer line extension example](methodology-report/image11.png)
-*Figure TBD. Transfer line extended to match floodplain extent.*  
-![Generated FIM example](methodology-report/image12.png)
-*Figure TBD. Example FIM output from Spring Creek pilot.*
 
-#### Case B — Quartz Creek near Ohio City, CO (Pilot)
-**Description**: Steep terrain with multiple headwaters and tributaries.  
-**Properties**: Flows: 500‑year (pilot). Stream orders: [Placeholder]. Slopes: [Placeholder]. Gage: USGS 09118000 (mainstem).  
-**Setting**:  
-![Quartz Creek pilot site map](methodology-report/image13.png)
-*Figure TBD. Quartz Creek pilot site overview.*  
-**What Was Performed**: Automated STL and domain creation with manual corrections.  
-**What Was Discovered**: Several STLs needed trimming or redrawing to avoid artificial tie‑ins; some required extension to cover the floodplain.  
-**Issues Encountered**: Artificial floodplain tie‑ins at confluences when STL overlapped the wrong divide.
+### Appendix B. Glossary
+#### Adjacent Reaches
+`connected reaches` and reaches draining into the same `reach outlet` for the reach of interest.
 
-![Transfer line trim example](methodology-report/image14.png)
-*Figure TBD. STL trimmed to avoid incorrect floodplain tie‑in.*  
-![Transfer line redraw example](methodology-report/image15.png)
-*Figure TBD. STL redrawn to align with correct floodplain.*  
-![Transfer line update example](methodology-report/image16.png)
-*Figure TBD. STL updated to overlap receiver floodplain.*  
-![Generated FIM example](methodology-report/image17.png)
-*Figure TBD. Example FIM output from Quartz Creek pilot.*
+All blue reaches are `adjacent reaches` for green reach.
+![Adjacent reaches](methodology-report/B6.png)
+*Figure B1. `Adjacent Reaches` example.*
 
-#### Case C — Delaware River at Trenton, NJ (Pilot)
-**Description**: Urban mainstem and tributary confluence with structures.  
-**Properties**: Flows: 100‑year (pilot). Stream orders: [Placeholder]. Slopes: [Placeholder]. Gages: USGS 01463500 (mainstem), 01464000 (tributary).  
-**Setting**:  
-![Delaware River pilot site map](methodology-report/image18.png)
-*Figure TBD. Delaware River pilot site overview.*  
-**What Was Performed**: Automated model build with manual review; culvert‑burning comparison.  
-**What Was Discovered**: Small reaches fully inundated at low flows were inefficient and were eclipsed or merged; culvert burning materially changed backwater and inundation.  
-**Issues Encountered**: Structure‑related impoundment in unconditioned DEM; wide floodplains exceeded default domain/STL extents.
+#### Common Outlet Reaches
+Reaches sharing common `reach outlet`.
 
-![Eclipsed reaches example](methodology-report/image19.png)
-*Figure TBD. Example of eclipsed/merged reaches in urban setting.*  
-![Overlay of modeled rasters](methodology-report/image20.png)
-*Figure TBD. Overlay of modeled rasters for tie‑in review.*  
-![Culvert‑burning terrain comparison](methodology-report/image21.jpeg)
-*Figure TBD. Terrain comparison with and without culvert burning.*  
-![Culvert impact on inundation](methodology-report/image22.jpeg)
-*Figure TBD. Impact of culvert representation on inundation extent.*
+Two green reaches here are common outlet reaches because they share same `reach outlet`.
+![Common outlet reaches](methodology-report/B4.png)
+*Figure B2. `Common Outlet Reaches` example.*
 
-#### Case D — Gila River, AZ (Pilot)
-**Description**: [Placeholder: site description.]  
-**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder]. Gages: [Placeholder].  
-**Setting**: [Placeholder: site map and reach layout.]  
-**What Was Performed**: [Placeholder.]  
-**What Was Discovered**: [Placeholder.]  
-**Issues Encountered**: [Placeholder.]
+#### Connected Reaches
+Reaches connected to a reach through upstream or downstream relationship.
 
-#### Case E — Ohio River at Evansville, IN (Pilot)
-**Description**: Large river with very wide floodplain and low slope.  
-**Properties**: Flows: 10‑, 50‑, 100‑, 500‑year. Stream orders: [Placeholder]. Slopes: ~0.00003 (pilot). DEM: 30 m (pilot).  
-**Setting**:  
-![Ohio River pilot site overview](methodology-report/image23.jpeg)
-*Figure TBD. Ohio River pilot site overview.*  
-**What Was Performed**: Coarse model run to guide STL placement; reach grouping for large‑river handling.  
-**What Was Discovered**: Hydrofabric divides were too narrow for STLs; coarse models provided appropriate WSEL contours for STL placement.  
-**Issues Encountered**: Inefficient overlap when STLs span full floodplain; bathymetry limitations affected stage accuracy.
+All blue reaches are `connected reaches` for green reach. Note that red reach is not.
+![Connected reaches](methodology-report/B5.png)
+*Figure B3. `Connected Reaches` example.*
 
-![FEMA floodplain context](methodology-report/image24.jpeg)
-*Figure TBD. FEMA floodplain context for large‑river pilot.*  
-![Coarse model WSEL contours](methodology-report/image25.jpeg)
-*Figure TBD. Coarse model WSEL contours used to guide STL placement.*  
-![Reach segmentation example](methodology-report/image26.jpeg)
-*Figure TBD. Example reach segmentation for large river.*  
-![Large river reach eclipsing](methodology-report/image27.png)
-*Figure TBD. Eclipsing reaches justified for large‑river efficiency.*  
-![Bathymetry sensitivity](methodology-report/image28.png)
-*Figure TBD. Bathymetry influence on stage accuracy.*
+#### FIM Transition Zone
+The `Transition Zone` for a reach is the area between the `Stage Transfer Line` and the outflow line.
 
-#### Case F — Susquehanna River at Binghamton, NY (Pilot)
-**Description**: Complex confluence with levees, divergence, and multiple flow changes.  
-**Properties**: Flows: 10‑, 100‑, 500‑year. Stream orders: [Placeholder]. Slopes: [Placeholder]. Gage‑weighted flows from BLE study.  
-**Setting**:  
-![Susquehanna pilot site overview](methodology-report/image29.png)
-*Figure TBD. Susquehanna pilot site overview.*  
-**What Was Performed**: Eclipsed/merged short reaches; multi‑reach model review against FEMA BLE.  
-**What Was Discovered**: Strong agreement with BLE where geometry was well handled; divergence behavior challenged strict reach‑based separation.  
-**Issues Encountered**: Anabranching‑like spill paths; need for combined models or expanded domains in hydraulically coupled areas.
+The yellow area in the image below shows the `Transition Zone` for this reach.
+![FIM transition zone](methodology-report/B7.png)
+*Figure B4. `FIM Transition Zone` (yellow area).*
 
-![Eclipsed reach examples](methodology-report/image30.png)
-*Figure TBD. Eclipsed/merged short reaches near confluence.*  
-![10-year FIM](methodology-report/image31.png)
-*Figure TBD. 10‑year discharge FIM example.*  
-![100-year FIM](methodology-report/image32.png)
-*Figure TBD. 100‑year discharge FIM example.*  
-![500-year FIM](methodology-report/image33.png)
-*Figure TBD. 500‑year discharge FIM example.*  
-![100-year comparison to FEMA BLE](methodology-report/image34.png)
-*Figure TBD. 100‑year comparison to FEMA BLE.*  
-![500-year comparison to FEMA BLE](methodology-report/image35.png)
-*Figure TBD. 500‑year comparison to FEMA BLE.*
+#### Headwater Reaches
+Reaches that have no reaches upstream of them in the reach network.
 
-#### Case G — Unnamed Wash near Hiko, NV (Pilot)
-**Description**: Desert wash with steep slopes and complex flow paths.  
-**Properties**: Flows: 100‑year (pilot). Stream orders: [Placeholder]. Slopes: [Placeholder]. Gage: USGS 09415600 (mainstem).  
-**Setting**:  
-![Unnamed wash pilot site overview](methodology-report/image36.jpeg)
-*Figure TBD. Unnamed wash pilot site overview.*  
-**What Was Performed**: Automated model build; review of highway crossing effects.  
-**What Was Discovered**: Road crossings without culvert representation caused upstream impoundment.  
-**Issues Encountered**: Structure‑related flow blockage; potential for divergent flow paths in arid systems.
+`headwater reaches` shown in green
+![Headwater reaches](methodology-report/B1.png)
+*Figure B5. `Headwater Reaches` shown in green.*
 
-![100-year FIM example](methodology-report/image37.jpeg)
-*Figure TBD. 100‑year discharge FIM example.*  
-![Highway crossing location](methodology-report/image38.png)
-*Figure TBD. Highway crossing location and culvert context.*  
-![Terrain showing road berm](methodology-report/image39.jpeg)
-*Figure TBD. Terrain showing road berm without culvert.*  
-![Depth raster showing impoundment](methodology-report/image40.jpeg)
-*Figure TBD. Depth raster showing impoundment upstream of crossing.*
+#### Lake and Coastal Reaches
+Subset of `Terminal Reaches` that discharge to
+- coasts
+- large waterbodies
 
-#### Case H — Lake Murray, SC (Pilot)
-**Description**: Lake/terminal reach behavior.  
-**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder].  
-**Setting**:  
-![Lake Murray pilot site overview](methodology-report/image41.jpeg)
-*Figure TBD. Lake Murray pilot site overview.*  
-**What Was Performed**: Tested reach‑based modeling feasibility.  
-**What Was Discovered**: Reach‑based 2D modeling is not appropriate in large waterbodies; GIS‑based handling is preferred.  
-**Issues Encountered**: Discharge‑based forecasting breaks down; need for pour‑point or waterbody‑stage handling.
+#### Reach Outlet
+End point of the reach.
 
-![Lake Murray example output](methodology-report/image42.jpeg)
-*Figure TBD. Example output for lake/terminal reach setting.*
+Reach outlet for green reach shown in red circle.
+![Reach outlet](methodology-report/B3.png)
+*Figure B6. `Reach Outlet` shown for green reach (red circle).*
 
-#### Case I — Plum Island Sound, MA (Pilot)
-**Description**: Coastal setting influenced by tides.  
-**Properties**: Flows: [Placeholder]. Stream orders: [Placeholder]. Slopes: [Placeholder]. Tidal gages: [Placeholder].  
-**Setting**:  
-![Plum Island Sound pilot site overview](methodology-report/image43.jpeg)
-*Figure TBD. Plum Island Sound pilot site overview.*  
-**What Was Performed**: Evaluated reach‑based feasibility; considered tidal stage inputs.  
-**What Was Discovered**: Coastal reaches are better handled with GIS‑based approaches and tidal stage inputs.  
-**Issues Encountered**: Reach‑based discharge methods do not capture coastal boundary dynamics.
+#### Reach Start
+Start point of the reach.
 
-#### Case 001 — Y‑Shape Confluence with Stream‑Order Mismatch (SDR)
-**Description**: Confluence with two‑level stream‑order difference and strong backwater sensitivity.  
-**Properties**: Flows: 500, 6000. Stream orders: 4 and 6. Coords: (1930357, 2289467) EPSG:5070.  
-**Setting**:  
-![Y‑shape confluence setting](methodology-report/Case-001_Fig-001.png)
-*Figure TBD. Y‑shape confluence with stream‑order mismatch.*  
-**What Was Performed**: Compared normal‑depth downstream boundary vs downstream stage transfer.  
-**What Was Discovered**: Normal‑depth runs underpredicted WSEL near the downstream tie‑in; stage transfer preserved backwater.  
-**Issues Encountered**: Lower WSEL at reach end without stage transfer.
+Reach start for green reach shown in red circle.
+![Reach start](methodology-report/B2.png)
+*Figure B7. `Reach Start` shown for green reach (red circle).*
 
-![KWSE vs normal depth comparison](methodology-report/Case-001_Fig-002.png)
-*Figure TBD. KWSE vs normal-depth comparison near tie‑in.*  
-![Water leaving the domain under normal-depth edges](methodology-report/Case-001_Fig-003.png)
-*Figure TBD. Water leaving the domain at non‑outlet locations.*
+#### Stage Transfer Line (STL)
+A line that is within the domain of both upstream and downstream reach models and which is used to transfer WSEL from the downstream model to an upstream model.
 
-#### Case 002 — Lake Reach (SDR)
-**Description**: Riverine reach discharging into a lake.  
-**Properties**: Flows: 2680. Stream order: 4. Coords: (1786548, 2606475) EPSG:5070.  
-**Setting**:  
-![Lake reach setting](methodology-report/Case-002_Fig-001.png)
-*Figure TBD. Lake reach setting.*  
-**What Was Performed**: Tested low‑slope normal‑depth boundary vs stage transfer.  
-**What Was Discovered**: Low‑slope normal depth caused pooling; stage transfer stabilized downstream water surface.  
-**Issues Encountered**: Higher WSEL near downstream end with low‑slope boundary.
+#### Terminal Reaches
+Terminal reaches include reaches that discharge to
+- coasts
+- areas outside the US
+- large waterbodies
 
-![Normal-depth run](methodology-report/Case-002_Fig-002.png)
-*Figure TBD. Normal-depth run for lake reach.*  
-![KWSE run](methodology-report/Case-002_Fig-003.png)
-*Figure TBD. Downstream stage transfer run for lake reach.*  
-![Low-slope boundary test](methodology-report/Case-002_Fig-004.png)
-*Figure TBD. Low-slope boundary condition causing pooling.*
+#### Upstream Mainstem Reach
+The reach with the largest drainage area of all `upstream reaches` for a reach of interest.
 
-#### Case 003 — Small Culverts (SDR)
-**Description**: Small culverts not represented in DEM caused divergent flow paths and impoundment.  
-**Properties**: Flows: 36.75. Stream order: 1. Coords: (1796329.9, 2607407.4) EPSG:5070.  
-**Setting**:  
-![Small culverts setting](methodology-report/Case-003_FIG-001.png)
-*Figure TBD. Small culverts case setting.*  
-**What Was Performed**: Ran models with unmodified DEM and compared to expected flowpaths.  
-**What Was Discovered**: Unburned culverts diverted flow and reduced downstream inundation.  
-**Issues Encountered**: Divergent flowpath; culvert blocking flow.
+#### Upstream Reach
+A reach that drain to a reach of interest.
 
-![Divergent flowpath example](methodology-report/Case-003_FIG-002.png)
-*Figure TBD. Divergent flowpath due to unburned culverts.*  
-![Culvert blocking flow](methodology-report/Case-003_FIG-007.png)
-*Figure TBD. Flow impounded by culvert obstruction.*  
-![Culvert blocking flow (alternate view)](methodology-report/Case-003_FIG-008.png)
-*Figure TBD. Additional example of culvert obstruction impacts.*
+### Appendix C. Pilot Cases
+All figures in this appendix follow the same symbology convention described in Figure 7, unless overridden by Figure caption.
 
-#### Case 004 — Model Domain Example (SDR)
-**Description**: Reach‑divide domain truncated flood extent.  
-**Properties**: Flows: 2344. Stream order: 4. Coords: (1798555, 2602987) EPSG:5070.  
-**Setting**:  
-![Model domain example setting](methodology-report/Case-004_FIG-001.png)
-*Figure TBD. Model domain example showing truncation.*  
-**What Was Performed**: Built domain from reach divide and compared to benchmark.  
-**What Was Discovered**: Floodplain extent cut off at domain edges.  
-**Issues Encountered**: FIM cutting off arbitrarily at edges.
+#### CASE #1 - Y Shape Confluence with 2 Level Stream Order Difference
 
-![Benchmark comparison](methodology-report/Case-004_FIG-002.png)
-*Figure TBD. Comparison to benchmark FIM.*
+![CASE #1 representative figure](methodology-report/C1.png)
+*Figure C1. Representative view for CASE #1.*
 
-#### Case 005 — Model Domain Example 2 (SDR)
-**Description**: Tributary water pooled against mainstem domain edge.  
-**Properties**: Flows: 52.8. Stream order: 1. Coords: (1811265, 2594919) EPSG:5070.  
-**Setting**:  
-![Model domain example 2 setting](methodology-report/Case-005_FIG-001.png)
-*Figure TBD. Tributary pooling against mainstem domain edge.*  
-**What Was Performed**: Reviewed domain behavior during modeled event.  
-**What Was Discovered**: Edge pooling can occur without hydraulic error but must be handled in automation.  
-**Issues Encountered**: Potential edge pooling artifacts.
+| Fact | Value |
+| --- | --- |
+| Case Number | Case-1 |
+| Location | Haddam, CT |
+| Date Observed | 2026-01-22 |
+| Coordinates (EPSG:5070) | 1930357, 2289467 |
+| Coordinates (EPSG:4326) | 41.466439,-72.470839 |
+| Flows (cms) | 500, 6000 |
+| Stream Orders | 4, 6 |
 
-#### Case 006 — Inflow Boundary Conditions (SDR)
-**Description**: Inflow geometry effects on WSEL artifacts.  
-**Properties**: Flows: 13,500. Stream order: 6. Coords: (1903629, 2354784) EPSG:5070. USGS gage 01172000.  
-**Setting**:  
-![Inflow boundary conditions setting](methodology-report/Case-006_FIG-001.png)
-*Figure TBD. Inflow boundary conditions case setting.*  
-**What Was Performed**: Compared point vs line inflow geometries at multiple locations.  
-**What Was Discovered**: Point inflows produced bullseye WSEL artifacts; line inflows reduced artifacts.  
-**Issues Encountered**: Water‑surface elevation anomalies near inflow boundary.
+**Description**
+This case was selected to evaluate confluence behavior where stream-order mismatch and low-gradient backwater make downstream stage handling sensitive.
 
-![Point inflow artifacts](methodology-report/Case-006_FIG-002.png)
-*Figure TBD. Point inflow producing WSEL artifacts.*  
-![Line inflow (upstream mainstem)](methodology-report/Case-006_FIG-003.png)
-*Figure TBD. Line inflow on upstream mainstem.*  
-![Line inflow at reach start](methodology-report/Case-006_FIG-004.png)
-*Figure TBD. Line inflow at reach start.*
+#### CASE #2 - Lake Reach
+
+![CASE #2 representative figure](methodology-report/C2.png)
+*Figure C2. Representative view for CASE #2.*
+
+| Fact | Value |
+| --- | --- |
+| Case Number | Case-2 |
+| Location | Burlington, VT |
+| Date Observed | 2026-01-27 |
+| Coordinates (EPSG:5070) | 1786548, 2606475 |
+| Coordinates (EPSG:4326) | 44.522842,-73.251503 |
+| Flows (cms) | 2680 |
+| Stream Orders | 4 |
+
+**Description**
+This case represents a terminal reach discharging into Lake Champlain and was selected to evaluate boundary-condition behavior in lake-connected settings.
+
+#### CASE #3 - Small Culverts
+
+![CASE #3 representative figure](methodology-report/C3.png)
+*Figure C3. Representative view for CASE #3.*
+
+| Fact | Value |
+| --- | --- |
+| Case Number | Case-3 |
+| Location | Winooski, VT |
+| Date Observed | 2026-01-27 |
+| Coordinates (EPSG:5070) | 1796329.9, 2607407.4 |
+| Coordinates (EPSG:4326) | 44.505228,-73.140441 |
+| Flows (cms) | 36.75 |
+| Stream Orders | 1 |
+
+**Description**
+This case was selected to evaluate terrain-conditioning needs where unresolved small culverts can cause divergent flow paths and upstream impoundment.
+
+#### CASE #4 - Model Domain Example
+
+![CASE #4 representative figure](methodology-report/C4.png)
+*Figure C4. Representative view for CASE #4.*
+
+| Fact | Value |
+| --- | --- |
+| Case Number | Case-4 |
+| Location | Burlington, VT |
+| Date Observed | 2026-01-27 |
+| Coordinates (EPSG:5070) | 1798555, 2602987 |
+| Coordinates (EPSG:4326) | 44.48438,-73.14014 |
+| Flows (cms) | 2344 |
+| Stream Orders | 4 |
+
+**Description**
+This case was selected to test model-domain construction where overbank floodplain extent lies far from the channel and can be clipped by narrow domain rules.
+
+#### CASE #5 - Model Domain Example 2
+
+![CASE #5 representative figure](methodology-report/C5.png)
+*Figure C5. Representative view for CASE #5.*
+
+| Fact                    | Value                |
+| ----------------------- | -------------------- |
+| Case Number             | Case-5               |
+| Location                | Richmond, VT         |
+| Date Observed           | 2026-01-27           |
+| Coordinates (EPSG:5070) | 1811265, 2594919     |
+| Coordinates (EPSG:4326) | 44.402896,-73.035427 |
+| Flows (cms)                   | 52.8                 |
+| Stream Orders           | 1                    |
+
+**Description**
+This case was selected to examine headwater tributary confluence behavior where water can pool near a common outlet, affecting automated domain-expansion logic.
+
+#### CASE #6 - Inflow Boundary Conditions
+
+![CASE #6 representative figure](methodology-report/C6.png)
+*Figure C6. Representative view for CASE #6.*
+
+| Fact | Value |
+| --- | --- |
+| Case Number | Case-6 |
+| Location | Springfield, MA |
+| Date Observed | 2026-02-04 |
+| Coordinates (EPSG:5070) | 1903629, 2354784 |
+| Coordinates (EPSG:4326) | 42.105287,-72.608837 |
+| Flows (cms) | 13500 |
+| Stream Orders | 6 |
+
+**Description**
+This mid-sized river case was selected to test upstream inflow-boundary geometry and placement effects on WSEL artifacts; discharges were based on USGS 01172000.
+
+#### CASE #7 - Complex Semi-urban Confluence Along Low-Gradient River
+
+![CASE #7 representative figure](methodology-report/C7.png)
+*Figure C7. Representative view for CASE #7.*
+
+| Fact | Value |
+| --- | --- |
+| Case Number | Case-7 |
+| Location | Binghamton, NY |
+| Date Observed | 2026-02-05 |
+| Coordinates (EPSG:5070) | 1633164, 2293585 |
+| Coordinates (EPSG:4326) | 42.10646,-75.95026 |
+| Flows (cms) | 4240 |
+| Stream Orders | 6 |
+
+**Description**
+This case was selected to stress methodology in a complex low-gradient semi-urban confluence with multiple tributaries and levee influences.
+
+#### CASE #8 - Very Wide Floodplain
+
+![CASE #8 representative figure](methodology-report/C8.png)
+*Figure C8. Representative view for CASE #8.*
+
+| Fact                    | Value              |
+| ----------------------- | ------------------ |
+| Case Number             | Case-8             |
+| Location                | Rosedale, MS       |
+| Date Observed           | 2026-02-09         |
+| Coordinates (EPSG:5070) | 449756,1201331     |
+| Coordinates (EPSG:4326) | 33.74552,-91.13034 |
+| Flows (cms)             | N/A                |
+| Stream Orders           | 10                 |
+
+**Description**
+This case was selected to test very wide-floodplain behavior along the Mississippi River, where floodplain widths of roughly 12–22 km challenge domain and boundary rules.
+
+#### CASE #9 - Rural Unconfined Farm Fields
+
+![CASE #9 representative figure](methodology-report/C9.png)
+*Figure C9. Representative view for CASE #9.*
+
+| Fact                    | Value              |
+| ----------------------- | ------------------ |
+| Case Number             | Case-9             |
+| Location                | Brinson, GA        |
+| Date Observed           | 2026-02-11         |
+| Coordinates (EPSG:5070) | 1070234,936890     |
+| Coordinates (EPSG:4326) | 30.93866,-84.74584 |
+| Flows (cms)             | N/A                |
+| Stream Orders           | 3, 1               |
+
+**Description**
+This case was selected to evaluate methodology performance in small, rural, unconfined agricultural channels.
+
+#### CASE #10 - Steep confined Mountainous Terrain
+
+![CASE #10 representative figure](methodology-report/C10.png)
+*Figure C10. Representative view for CASE #10.*
+
+| Fact                    | Value               |
+| ----------------------- | ------------------- |
+| Case Number             | Case-10             |
+| Location                | Quartz, CO          |
+| Date Observed           | 2026-02-11          |
+| Coordinates (EPSG:5070) | -915338,1776607     |
+| Coordinates (EPSG:4326) | 38.56847,-106.61573 |
+| Flows (cms)             | N/A                 |
+| Stream Orders           | 4, 1                |
+
+**Description**
+This case was selected to evaluate steep, confined mountainous terrain with multiple tributary inflows.
+
+#### CASE #11 - Large Urban River
+
+![CASE #11 representative figure](methodology-report/C11.png)
+*Figure C11. Representative view for CASE #11.*
+
+| Fact                    | Value                |
+| ----------------------- | -------------------- |
+| Case Number             | Case-11              |
+| Location                | Trenton, NJ          |
+| Date Observed           | 2026-02-11           |
+| Coordinates (EPSG:5070) | 1776154.1,2110466.2  |
+| Coordinates (EPSG:4326) | 40.215714,-74.770855 |
+| Flows (cms)             | N/A                  |
+| Stream Orders           | 6, 3                 |
+
+**Description**
+This case was selected as a large urban-river testbed to assess structure-influenced hydraulics and culvert/bridge handling strategies.
+
+#### CASE #12 - Desert Wash
+
+![CASE #12 representative figure](methodology-report/C12.png)
+*Figure C12. Representative view for CASE #12.*
+
+| Fact                    | Value               |
+| ----------------------- | ------------------- |
+| Case Number             | Case-12             |
+| Location                | Hiko, NV            |
+| Date Observed           | 2026-02-12          |
+| Coordinates (EPSG:5070) | -1681776,1777038    |
+| Coordinates (EPSG:4326) | 37.49279,-115.34133 |
+| Flows (cms)             | N/A                 |
+| Stream Orders           | 3, 2, 1             |
+
+**Description**
+This case was selected to evaluate desert-wash behavior, where nonstandard morphology and adjacent-reach interactions can challenge hydrofabric-based domain logic.
+
+#### CASE #13 - Large Inland Waterbody
+
+![CASE #13 representative figure](methodology-report/C13.png)
+*Figure C13. Representative view for CASE #13.*
+
+| Fact                    | Value              |
+| ----------------------- | ------------------ |
+| Case Number             | Case-13            |
+| Location                | Lake Murray, SC    |
+| Date Observed           | 2026-02-12         |
+| Coordinates (EPSG:5070) | 1334048,1325182    |
+| Coordinates (EPSG:4326) | 34.06732,-81.37340 |
+| Flows (cms)             | N/A                |
+| Stream Orders           | 1, 2, 5, 6         |
+
+**Description**
+This case was selected to develop and test methodology for large inland waterbody settings such as lakes and reservoirs.
+
+#### CASE #14 - Coastal Area
+
+![CASE #14 representative figure](methodology-report/C14.png)
+*Figure C14. Representative view for CASE #14.*
+
+| Fact                    | Value              |
+| ----------------------- | ------------------ |
+| Case Number             | Case-14            |
+| Location                | Plum Island, MA    |
+| Date Observed           | 2026-02-12         |
+| Coordinates (EPSG:5070) | 2025825,2462203    |
+| Coordinates (EPSG:4326) | 42.72671,-70.81783 |
+| Flows (cms)             | N/A                |
+| Stream Orders           | 1, 2, 3            |
+
+**Description**
+This case was selected to develop and test methodology for coastal boundary settings.
+
+#### CASE #15 - Large River
+
+![CASE #15 representative figure](methodology-report/C15.png)
+*Figure C15. Representative view for CASE #15.*
+
+| Fact                    | Value              |
+| ----------------------- | ------------------ |
+| Case Number             | Case-15            |
+| Location                | Evansville, IN     |
+| Date Observed           | 2026-02-12         |
+| Coordinates (EPSG:5070) | 716490,1679388     |
+| Coordinates (EPSG:4326) | 37.87805,-87.75769 |
+| Flows (cms)             | N/A                |
+| Stream Orders           | 7                  |
+
+**Description**
+This case was selected as a large-river testbed with a wide floodplain and available surveyed bathymetry to evaluate domain rules and stage behavior.
