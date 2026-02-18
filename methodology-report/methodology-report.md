@@ -190,7 +190,7 @@ While the intention of this WebApp was to aid in methodology development, we see
 ### System Decision Records (SDR)
 During initial pilot development, the WebApp made it possible to run many more cases quickly, and the main bottleneck shifted from model setup to decision governance: avoiding cycles on repeated questions and keeping rationale tied to evidence as edge cases accumulated.
 
-To address that bottleneck and systemize many smaller decisions that together form the overall methodology, we adopted [System Decision Records (SDR)](https://github.com/ar-siddiqui/sdr), a structured decision-management framework adapted from Architecture Decision Records (ADR) that captures decision evolution, alternatives, and evidence rather than only the final choice. In this project, SDR is used as the governance mechanism for methodology development.
+To address that bottleneck and systemize many smaller decisions that together form the overall methodology, we adopted System Decision Records (SDR), a structured decision-management framework adapted from Architecture Decision Records (ADR) that captures decision evolution, alternatives, and evidence rather than only the final choice (Siddiqui, n.d.). In this project, SDR is used as the governance mechanism for methodology development.
 
 In practice, the SDR system is organized around a small set of linked objects:
 - Cases - concrete scenarios encountered during pilot development.
@@ -251,7 +251,11 @@ Figure 8 depicts location of all cases. Table 3 provides case number, location, 
 | Case #15 | Evansville, IN | Large River |
 
 ### Core Method Decisions and Evidence
-This subsection explains the decision logic behind the current methodology baseline. It follows the same implementation sequence used during model development. For each decision, it summarizes the design question, the alternatives considered, how evidence from testing changed the decision over time, and which alternative is currently selected. Here, an alternative means one candidate option within a decision. At the end of this subsection Table TBD summarizes key design decisions and their current valid solution as a decision register. This decision register form our baseline methodology for automation work that will follow.
+This subsection explains the decision logic behind the current methodology baseline. It follows the same implementation sequence used during model development. For each decision, it summarizes the design question, the alternatives considered, how evidence from testing changed the decision over time, and which alternative is currently selected. Here, an alternative means one candidate option within a decision.
+
+This methodology development process was managed through System Decision Records (SDR), and both decisions and alternatives are expected to continue evolving as additional pilot evidence is collected. Appendix D is derived directly from the current SDR state and provides the individual decision pages, including the complete alternative sets for each decision.
+
+At the end of this subsection Table TBD summarizes key design decisions and their current valid solution as a decision register. This decision register form our baseline methodology for automation work that will follow.
 
 #### Inflow and Outflow Geometries Decisions
 To create a methodology of automated model development a set of decisions is needed to define geometry and boundary placement: where water enters, where stage is transferred, and where water is allowed to leave the domain. These choices had strong first-order impact on stability and map artifacts.
