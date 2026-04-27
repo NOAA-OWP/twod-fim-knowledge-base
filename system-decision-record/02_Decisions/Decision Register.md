@@ -41,3 +41,6 @@ Status meanings:
 | [[DR-025 - What Should be the Geometry of STL]] | [[DR-025 - What Should be the Geometry of STL#ALT-B - WSEL Contour From D/S FIM\|ALT-B - WSEL Contour From D/S FIM]] | Alternate Selected | 2025-02-09 | |
 | [[DR-026 - Should There be 1 STL per Reach or 1 STL per Reach per RUN]] | [[DR-026 - Should There be 1 STL per Reach or 1 STL per Reach per RUN#ALT-A - 1 STL Per Reach From Largest Model Run\|ALT-A - 1 STL Per Reach From Largest Model Run]] | Alternate Selected | 2026-02-09 | |
 | [[DR-027 - How do Deal with Flat Reaches]] | [[DR-027 - How do Deal with Flat Reaches#ALT-A - Do Nothing\|ALT-A - Do Nothing]] | Alternate Selected | 2026-02-09 | |
+| [[DR-028 - What Metrics Should be Used to Terminate Model Runs]] | [[DR-028 - What Metrics Should be Used to Terminate Model Runs#ALT-E - Volume Convergence\|ALT-E - Volume Convergence]] | Alternate Selected | 2026-04-27 | |
+| [[DR-029 - What Value Should be Used to Determine Volume Convergence]] | [[DR-029 - What Value Should be Used to Determine Volume Convergence#ALT-A - 1e-3\|ALT-A - 1e-3]] | Alternate Selected | 2026-04-27 | |
+no
