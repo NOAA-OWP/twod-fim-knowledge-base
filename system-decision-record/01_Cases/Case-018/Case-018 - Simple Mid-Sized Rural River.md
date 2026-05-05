@@ -84,18 +84,7 @@ Changes:
  - Manual expansion of domain for reach 30913
  - Downstream outlet line manually defined using valley walls.
 
-Each reach model was executed for approximately 2x the modeler-determined steady state time.  Depth grids were produced at intervals ranging from 200-900 seconds depending on the model.  Depth grid print time was determined by attempting to get at least three rasters in the steepest portion of the convergence metric timeseries. From these rasters, several metrics were assessed to identify quasi-steady state.
- - Mean Depth Change: The depth difference at each cell was taken between each raster timestep, and the values were averaged across the raster.
-	 - Interpretation: Are depths changing by a small amounts? Does not take into account river size/depth magnitude variability.
- - Normalized Mean Depth Change: The Mean Depth Change metric was divided by the mean depth across all wetted cells at each timestep.
-	 - Interpretation: Are depths changing by a small amount relative to the reach mean depth? Attempts to account for river size/depth magnitude variability.
- - Relative Depth Change: The difference in Mean Depth Change metric between timesteps was divided by the Mean Depth Change at the previous timestep.
-	 - Interpretation: Is the Mean Depth Change metric converging/showing a flat slope?
- - Coefficient of Variation: The depth difference at each cell was taken between each raster timestep, and the standard deviation of values was taken across the raster. This value was then divided by the mean cell depth.
-	 - Interpretation: Are depth changes highly variable within the reach?  Is one area of the reach very stable while another still has areas filling?
- - Volume Convergence: Change in volume across the reach between timesteps normalized by the inflow volume in that period.
-	 - Interpretation: Is the discharge out equal to the discharge in? Is the reach actively filling or draining?
-Timeseries for each of these metrics at each reach are shown below along with the modeler-determined steady state time.
+Each reach model was executed for approximately 2x the modeler-determined steady state time.  Depth grids were produced at intervals ranging from 200-900 seconds depending on the model.  Depth grid print time was determined by attempting to get at least three rasters in the steepest portion of the convergence metric timeseries. From these rasters, several metrics were assessed to identify quasi-steady state. Definitions of the metrics can be found in [[DR-028 - What Metrics Should be Used to Terminate Model Runs]]. Timeseries for each of these metrics at each reach are shown below along with the modeler-determined steady state time.
 ![[FIG-015.png]]
 Values for each metric at the modeler-determined steady state time were interpolated and are shown in the table below.
 
