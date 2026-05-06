@@ -105,6 +105,12 @@ $$
 
 (Interpretation: Is the discharge out equal to the discharge in? Is the reach actively filling or draining?)
 
+It's worth noting that LISFLOOD-FP provides functionality to terminate runs when steady state is reached using this condition. Oddly, this option is only available as a command line flag in newer versions of the software and cannot be controlled from the .par file.  Further complicating the matter, the function does not work in GPU mode (CPU mode only).
+
+Reference in the LISFLOOD-FP user manual:
+
+![[DR-028-FIG-001.png]]
+
 ### ALT-F - Inundated Area Change (m2/s)
 
 The area of cells with depth greater than 0 was compared between each timestep. 
