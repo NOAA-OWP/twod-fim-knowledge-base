@@ -84,7 +84,7 @@ Changes:
  - Manual expansion of domain for reach 30913
  - Downstream outlet line manually defined using valley walls.
 
-Each reach model was executed for approximately 2x the modeler-determined steady state time.  Depth grids were produced at intervals ranging from 200-900 seconds depending on the model.  Depth grid print time was determined by attempting to get at least three rasters in the steepest portion of the convergence metric timeseries. From these rasters, several metrics were assessed to identify quasi-steady state. Definitions of the metrics can be found in [[DR-028 - What Metrics Should be Used to Terminate Model Runs]]. Timeseries for each of these metrics at each reach are shown below along with the modeler-determined steady state time.
+Each reach model was executed for approximately 2x the modeler-determined steady state time.  Depth grids were produced at intervals ranging from 200-900 seconds depending on the model.  Depth grid print time was determined by attempting to get at least three rasters in the steepest portion of the convergence metric timeseries. From these rasters, several metrics were assessed to identify quasi-steady state. Definitions of the metrics can be found in [[DR-022 - What Metrics Should be Used to Terminate Model Runs]]. Timeseries for each of these metrics at each reach are shown below along with the modeler-determined steady state time.
 ![[FIG-015.png]]
 Values for each metric at the modeler-determined steady state time were interpolated and are shown in the table below.
 
@@ -99,20 +99,20 @@ Values for each metric at the modeler-determined steady state time were interpol
 Metric review:
  - Mean Depth Change: Examining the y-axis and the table values of the Mean Depth Change metric, it is clear that this metric varies across orders of magnitude even within this relatively homogeneous setting. Furthermore, the values converge to very low values very early on in the simulation, reducing the sensitivity of this metric (i.e., large changes in time only yield small changes in the metric value).
  > [!Error] Reject
->[[DR-028 - What Metrics Should be Used to Terminate Model Runs]] > [[DR-028 - What Metrics Should be Used to Terminate Model Runs#ALT-A - Mean Depth Change|ALT-A - Mean Depth Change]]
+>[[DR-022 - What Metrics Should be Used to Terminate Model Runs]]]] > [[DR-022 - What Metrics Should be Used to Terminate Model Runs#ALT-B - Mean Depth Change (m/s)|ALT-B - Mean Depth Change (m/s)]]
 
 
  - Normalized Mean Depth Change: This metric operates over a more consistent range than Mean Depth Change, which is good.  That said, this metric suffers from the same issue where values converge to very low values very early on in the simulation, reducing the sensitivity of this metric.
  > [!Error] Reject
->[[DR-028 - What Metrics Should be Used to Terminate Model Runs]] > [[DR-028 - What Metrics Should be Used to Terminate Model Runs#ALT-B - Normalized Mean Depth Change|ALT-B - Normalized Mean Depth Change]]
+>[[DR-022 - What Metrics Should be Used to Terminate Model Runs]]]] > [[DR-022 - What Metrics Should be Used to Terminate Model Runs#ALT-C - Normalized Mean Depth Change (1/s)|ALT-C - Normalized Mean Depth Change (1/s)]]
 
  - Relative Depth Change: Generally, the Relative Depth Change metric oscillates around 0 near the modeler defined steady state time.  This behavior is fairly consistent between reaches.  While this shows promise, the signal is very noisy, which may limit our ability to determine steady state via automated procedures.  In the future, a smoothing kernel could be applied across the signal to reduce noise and aid in automated convergence checks.
  > [!Error] Reject
->[[DR-028 - What Metrics Should be Used to Terminate Model Runs]] > [[DR-028 - What Metrics Should be Used to Terminate Model Runs#ALT-C - Relative Depth Change|ALT-C - Relative Depth Change]]
+>[[DR-022 - What Metrics Should be Used to Terminate Model Runs]]]] > [[DR-022 - What Metrics Should be Used to Terminate Model Runs#ALT-D - Relative Mean Depth Change (-)|ALT-D - Relative Mean Depth Change (-)]]
 
  - Coefficient of Variation: Coefficient of Variation is the only metric that increases with time.  This is because as time increases, mean depth changes become smaller at a faster rate than the variance of depth changes decreases.  No trend is readily apparent across all reaches at the modeler-determined steady state point, although further investigation could be performed.  It's worth noting that reach 30912 was a reach that showed slow filling behavior, and it is the only reach where Coefficient of Variation was not rapidly increasing near model convergence time.  This may indicate that this metric could be used as an auxiliary quality check to tell if a reach was still filling/draining at termination time.
  > [!Error] Reject
->[[DR-028 - What Metrics Should be Used to Terminate Model Runs]] > [[DR-028 - What Metrics Should be Used to Terminate Model Runs#ALT-D - Coefficient of Variation|ALT-D - Coefficient of Variation]]
+>[[DR-022 - What Metrics Should be Used to Terminate Model Runs]]]] > [[DR-022 - What Metrics Should be Used to Terminate Model Runs#ALT-F - Depth Change Coefficient of Variation (-)|ALT-F - Depth Change Coefficient of Variation (-)]]
 
  - Volume Convergence: This metric showed reliable smooth transitions on a well-defined range from 1-0.  Convergence around the 0 value generally occurred later in the simulation than Mean Depth Change and Normalized Mean Depth Change convergence (closer to the modeler-determined steady state time).  While table values for this metric varied over several orders of magnitude, a supplementary analysis (shown below) found that a value of 1e-3 performed well across all reaches.
 

@@ -1,5 +1,5 @@
 ## Description
-If [[DR-028 - What Metrics Should be Used to Terminate Model Runs#ALT-E - Volume Convergence]] is used for quasi-steady state determination, what value should be used to trigger model termination.
+If [[DR-022 - What Metrics Should be Used to Terminate Model Runs#ALT-G - Volume Convergence (-)]] is used for quasi-steady state determination, what value should be used to trigger model termination.
 
 ## Alternatives
 
