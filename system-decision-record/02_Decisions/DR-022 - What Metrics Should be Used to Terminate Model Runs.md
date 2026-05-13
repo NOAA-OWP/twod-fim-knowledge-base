@@ -12,15 +12,15 @@ Determine quasi-steady behavior using repeated checks that inflow and outflow ar
 
 The depth difference at each cell was taken between each raster timestep and divided by the timestep (dt). These "delta" values were then averaged across the raster for each timestep.
 
-$$  
-\displaystyle  
-\overline{\Delta D}(t) =  
-\frac{1}{n m}  
-\sum_{i=0}^{n}\sum_{j=0}^{m}  
-\frac{  
-d_{i,j,t} - d_{i,j,t-1}  
-}{  
-\Delta t  
+$$
+\displaystyle
+\overline{\Delta D}(t) =
+\frac{1}{n m}
+\sum_{i=0}^{n}\sum_{j=0}^{m}
+\frac{
+d_{i,j,t} - d_{i,j,t-1}
+}{
+\Delta t
 }
 $$
 
@@ -28,15 +28,15 @@ $$
 
 ### ALT-C - Normalized Mean Depth Change (1/s)
 
-The Mean Depth Change metric was divided by the mean depth across all wetted cells at each timestep.  
+The Mean Depth Change metric was divided by the mean depth across all wetted cells at each timestep.
 
-$$  
-\displaystyle  
-\overline{\Delta D}_{\text{norm}}(t) =  
-\frac{  
-\overline{\Delta D}(t)  
-}{  
-\overline{D}_{\text{wet}}(t)  
+$$
+\displaystyle
+\overline{\Delta D}_{\text{norm}}(t) =
+\frac{
+\overline{\Delta D}(t)
+}{
+\overline{D}_{\text{wet}}(t)
 }
 $$
 
@@ -44,15 +44,15 @@ $$
 
 ### ALT-D - Relative Mean Depth Change (-)
 
-The difference in Mean Depth Change metric between timesteps was divided by the Mean Depth Change at the previous timestep. 
+The difference in Mean Depth Change metric between timesteps was divided by the Mean Depth Change at the previous timestep.
 
 $$
-\displaystyle  
-R_{\Delta D}(t) =  
-\frac{  
-\overline{\Delta D}_t - \overline{\Delta D}_{t-1}  
-}{  
-\overline{\Delta D}_{t-1}  
+\displaystyle
+R_{\Delta D}(t) =
+\frac{
+\overline{\Delta D}_t - \overline{\Delta D}_{t-1}
+}{
+\overline{\Delta D}_{t-1}
 }
 $$
 
@@ -60,15 +60,15 @@ $$
 
 ### ALT-E - Slope Mean Depth Change (m/s2)
 
-The difference in Mean Depth Change metric between timesteps was divided by the timestep. 
+The difference in Mean Depth Change metric between timesteps was divided by the timestep.
 
 $$
-\displaystyle  
-S_{\Delta D}(t) =  
-\frac{  
-\overline{\Delta D}_t - \overline{\Delta D}_{t-1}  
-}{  
-\Delta t  
+\displaystyle
+S_{\Delta D}(t) =
+\frac{
+\overline{\Delta D}_t - \overline{\Delta D}_{t-1}
+}{
+\Delta t
 }
 $$
 
@@ -76,32 +76,32 @@ $$
 
 ### ALT-F - Depth Change Coefficient of Variation (-)
 
-The depth difference at each cell was taken between each raster timestep, and the standard deviation of values was taken across the raster. This value was then divided by the mean cell depth. 
+The depth difference at each cell was taken between each raster timestep, and the standard deviation of values was taken across the raster. This value was then divided by the mean cell depth.
 
 $$
-\displaystyle  
-CV_{\Delta D}(t) =  
-\frac{  
-\sigma\left(|\Delta D|\right)_t  
-}{  
-\overline{\Delta D}_t  
+\displaystyle
+CV_{\Delta D}(t) =
+\frac{
+\sigma\left(|\Delta D|\right)_t
+}{
+\overline{\Delta D}_t
 }
 $$
 
 (Interpretation: Are depth changes highly variable within the reach? Is one area of the reach very stable while another still has areas filling?)
 
 ### ALT-G - Volume Convergence (-)
-#current 
+#current
 
-Change in volume across the reach between timesteps normalized by the inflow volume in that period. 
+Change in volume across the reach between timesteps normalized by the inflow volume in that period.
 
 $$
-\displaystyle  
-VC(t) =  
-\frac{  
-\frac{V_t - V_{t-1}}{\Delta t}  
-}{  
-Q_{\text{in}}  
+\displaystyle
+VC(t) =
+\frac{
+\frac{V_t - V_{t-1}}{\Delta t}
+}{
+Q_{\text{in}}
 }
 $$
 
@@ -115,15 +115,15 @@ Reference in the LISFLOOD-FP user manual:
 
 ### ALT-H - Inundated Area Change (m2/s)
 
-The area of cells with depth greater than 0 was compared between each timestep. 
+The area of cells with depth greater than 0 was compared between each timestep.
 
 $$
-\displaystyle  
-\frac{dA}{dt} =  
-\frac{  
-A_t - A_{t-1}  
-}{  
-\Delta t  
+\displaystyle
+\frac{dA}{dt} =
+\frac{
+A_t - A_{t-1}
+}{
+\Delta t
 }
 $$
 
@@ -131,21 +131,38 @@ $$
 
 ### ALT-I - Normalized Inundated Area Change (1/s)
 
-The Inundated Area Change metric was divided by the inundated area at each timestep. 
+The Inundated Area Change metric was divided by the inundated area at each timestep.
 
 $$
-\displaystyle  
-\left(\frac{dA}{dt}\right)_{\text{norm}} =  
-\frac{  
-\frac{A_t - A_{t-1}}{\Delta t}  
-}{  
-A_t  
+\displaystyle
+\left(\frac{dA}{dt}\right)_{\text{norm}} =
+\frac{
+\frac{A_t - A_{t-1}}{\Delta t}
+}{
+A_t
 }
 $$
 
 (Interpretation: Are new cells wetting? Normalized for reaches and rivers of different sizes.)
 
+### ALT-J - Slope Volume Convergence (-)
+#current
+
+Change in volume convergence between timesteps divided by the timestep.
+
+$$
+\displaystyle
+\Delta{VC}(t) =
+\frac{
+VC(t) - VC(t-1)
+}{
+\Delta t
+}
+$$
+
+(Interpretation: Is volume convergence line flat?)
+
 ## Decision History
-- Started with ALT-A 
+- Started with ALT-A
 - Rejected ALT-A because Qout is not calculated when running LISFLOOD-FP in GPU mode
 - 2026-04-27:  Selected ALT-G
