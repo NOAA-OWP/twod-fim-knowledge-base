@@ -4,20 +4,44 @@ Strawmen for design review. This file specifies:
 
 1. S3 path conventions (single source of truth — producer and consumer derive paths from the same inputs).
 2. Manifest schemas (`override.manifest.yaml`, `model.manifest.json`, `run.manifest.json`).
-3. Interface types (`Store`, `Catalog`, `CatalogPolicy`).
-4. Worker function signatures (`reach_build`, `reach_scenario_set`, `reach_scenario_run`, `indexer`).
+3. Worker function signatures (`reach_build`, `reach_scenario_set`, `reach_scenario_run`, `indexer`).
+
+## Scope: pipeline vs tooling
+
+Per PR #73 review, the pipeline repo owns *orchestration and reaction*; the tooling repo owns *what artifacts are and how they get built*. Concretely:
+
+**Pipeline owns:**
+- Worker function *signatures* and orchestration contracts (what goes in / comes out / idempotency).
+- `reach_scenario_set` as a pipeline function (first iteration — PR #73 comment #11: *"I think in first iteration, we can consider this a pipeline function. So this one does belong to pipeline."*).
+- The indexer.
+- Sensors (`override_added_sensor`, `run_manifest_landed_sensor`, etc.) — see [`triggers-and-invalidation.md`](triggers-and-invalidation.md).
+- **Network propagator** — given a new `run.manifest.json` for reach R, discover upstream reaches whose runs depended on R's prior outputs and trigger their new partitions. Multi-hop. **Proposed design (TBD pending team review):** two complementary discovery mechanisms — *(a) topology graph walk* yields candidate upstream reaches with bounded fan-out; *(b) catalog lookup on `boundary_conditions[].source.from_run_hash`* confirms which candidates actually need re-running (vs. those already pointing at the new R hash or sampled from a different downstream version). Topology alone over-fires; catalog alone over-scans. See triggers spec for detailed algorithm (still being designed). *Pipeline requirement on the tooling schema: for mechanism (b), `run.manifest.json`'s TRANSFER BC source must carry upstream-discoverable pointers (e.g., `from_run_hash`) — coordinate with tooling on the minimum field set. Without them, propagation falls back to topology-only and over-fires.*
+- **Trigger consolidator** — given multiple triggers arriving close in time (or while related work is in flight), decide whether to coalesce, queue, or kill in-flight. Algorithm TBD (see triggers spec).
+- S3 path *conventions* at the contract level (so the pipeline knows where to watch).
+- The catalog's currency semantics and how consumers query "current."
+
+**Tooling owns (defined in the tooling repo, referenced here):**
+- Manifest schemas — exact field set of `override.manifest.yaml`, `model.manifest.json`, `run.manifest.json` (PR #73 #1: *"this would be in the scope of our tooling repo"*; #6 and #7 on the schemas: *"This will be useful for when Scott would work towards creating this, I think this is beyond pipeline scope"*).
+- Hash rules — what is excluded from the canonical-JSON hash (PR #73 #2: *"should be dealt with in the scope of other repo"*).
+- Supporting dataclasses for `reach_build` inputs (`HydrofabricRef`, `DemSource`, `RoughnessSource`, `OverrideRef`, `DomainSpec`, etc.) (PR #73 #10: *"Beyond the scope of pipeline"*).
+- Internal implementation of `reach_build` and `reach_scenario_run` — the pipeline treats these as opaque black boxes (PR #73 #9: *"the pipeline should consider these functions opaque"*).
+- *Inferred (not directly addressed in PR):* the path-builder script (`s3_paths.py`) — same domain as the schemas.
+
+Sections below that describe schema fields and dataclass shapes are kept for context but are slated to move to the tooling repo once that spec exists.
 
 ## What feedback I'm seeking
 
-1. **Field set in each manifest** — anything missing, anything noise?
-2. **Hash exclusion rule** — exclude `outputs.*` + `created_at` + `built_by` from manifest hashes (so they don't self-reference)?
-3. **Override semantics** — is folder = "one self-contained patch package (`patch.tif` + `manifest.yaml`)" the right unit?
-4. **TRANSFER BC source pointer** — keep the verbose lineage (`from_reach_id` + `from_model_manifest_hash` + `from_run_hash` + `sampled_from`) so each run is self-describing, or trim?
-5. **`scenarios.json` persistence** — write planner output to S3 for audit (currently marked optional in §4.2), or keep the plan implicit and reconstructable from `run.manifest.json` files?
+1. **Field set in each manifest** — *Moved to tooling repo (PR #73 #1).*
+2. **Hash exclusion rule** — *Moved to tooling repo (PR #73 #2).*
+3. **Override semantics** — concretely: an override is one folder containing exactly `patch.tif` + `manifest.yaml`, and each folder = one independent patch package. The pipeline treats the folder as the indivisible unit when it fires `override_added`. Is this understanding correct?
+4. ~~**TRANSFER BC source pointer**~~ — *Moved to tooling repo (schema concern). Pipeline-side requirement noted in the Network propagator bullet above.*
+5. ~~**`scenarios.json` persistence**~~ — *Decided: scenarios are implicit (PR #73 #4, #14).*
 
 ---
 
 ## 1. S3 path conventions
+
+**Owner:** pipeline (the conventions / layout). Path-builder script implementation: tooling (inferred).
 
 All paths sit under a single root configurable via `STORE_ROOT` (real S3 bucket URI or local FS directory). Layout:
 
@@ -32,13 +56,11 @@ All paths sit under a single root configurable via `STORE_ROOT` (real S3 bucket 
 │       ├── rasters/
 │       │   ├── dem.tif         # 30-day TTL via lifecycle policy
 │       │   └── roughness.tif
-│       ├── vectors/
-│       │   ├── divide.geojson
-│       │   ├── centerline.geojson
-│       │   ├── us_bc_line.geojson
-│       │   └── transfer_line.geojson
-│       └── scenarios/                       # optional — planner snapshot for traceability
-│           └── {scenario_set_hash}.json     # see §4.2
+│       └── vectors/
+│           ├── divide.geojson
+│           ├── centerline.geojson
+│           ├── us_bc_line.geojson
+│           └── transfer_line.geojson
 │
 └── results/reach={reach_id}/{model_manifest_hash}/{run_hash}/
         └── q={q_label}/kwse={kwse_label}/
@@ -56,7 +78,7 @@ All paths sit under a single root configurable via `STORE_ROOT` (real S3 bucket 
 | `{manifest_hash}` | str | first 16 hex chars of `sha256(canonical_json(manifest.json))` | `f4a9bc12d6e80f3a` |
 | `{model_manifest_hash}` | str | same as `{manifest_hash}` of the model this run targets | `f4a9bc12d6e80f3a` |
 | `{run_hash}` | str | first 16 hex chars of `sha256(canonical_json(run.manifest.json))` | `1c8e44b9a2305f7d` |
-| `{q_label}` | str | `Q{annual_recurrence_interval}` | `Q100` |
+| `{q_label}` | str | Return-period label per `guide.md` example (e.g. `Q100` = 100-year recurrence interval). PR #73 #5 raised an alternate `q_{value_cms}` form ("for 200 cms `q_200` or `f_200`"); path convention follows `guide.md` until that change lands explicitly. | `Q100` |
 | `{kwse_label}` | str | decimal with one fractional digit | `2.5` |
 
 **Path builder**: s3 paths are constructed via python script. Producers and consumers MUST use it — never hand-format a path.
@@ -64,6 +86,10 @@ All paths sit under a single root configurable via `STORE_ROOT` (real S3 bucket 
 ---
 
 ## 2. Schemas
+
+**Owner:** tooling. Pipeline only *consumes* these — pipeline does not define or evolve the field set. Schemas below are kept in this spec for context until the tooling spec exists.
+
+**Status (2026-05-14):** tooling team confirmed in the Dewberry-call meeting that they will start on schemas soon. Once their spec lands, the schemas below move out of this file and become a pointer.
 
 ### 2.1 `override.manifest.yaml`
 
@@ -158,13 +184,13 @@ Lives at `results/reach={reach_id}/{model_manifest_hash}/{run_hash}/q={q}/kwse={
   "run_type": "kwse",                          // "nd" | "kwse"
   "scenario": {
     "q_label": "Q100",
-    "q_value_cfs": 12300.0,
+    "q_value_cms": 200.0,
     "kwse_label": "2.5",
     "kwse_value_ft": 2.5
   },
 
   "boundary_conditions": [
-    {"location": "us_bc_line", "kind": "QFIX", "value": 12300.0, "units": "cfs"},
+    {"location": "us_bc_line", "kind": "QFIX", "value": 200.0, "units": "cms"},
     {"location": "transfer_line", "kind": "HFIX", "value": 2.5, "units": "ft",
      "source": {
        "kind": "stage_transfer",
@@ -205,23 +231,19 @@ Hash rule mirrors `model.manifest.json`: exclude `outputs`, `execution`, `create
 
 ---
 
-## 3. Interface types
+## 3. Worker function signatures
 
-The worker functions in §4 reference three small adapter types that abstract "where data lives." Same worker code runs against any backend implementing these interfaces — local FS in the mock, real S3 / Postgres in production.
+**Owner:** signatures = pipeline contract. Implementations split per function (see each subsection).
 
-**`Store`** — read/write/exists/list against the artifact backend.
+Workers are **stateless functions**: `(inputs) → side-effects-to-S3`. They take inputs, produce S3 artifacts, and that's it. The three reach workers (`reach_build`, `reach_scenario_set`, `reach_scenario_run`) never touch the DB; only the `indexer` writes to the catalog.
 
-**`Catalog`** — upsert/query against the catalog backend.
+**State is in S3, not in returns.** Workers may return a thin advisory result (e.g., `completed` vs `reused`) as a hint to avoid redundant S3 reads, but the orchestrator MUST be able to reconstruct full workflow state from S3 + catalog alone — return values are not load-bearing. This makes workers safe to retry, replay, and resume after orchestrator crashes.
 
-**`CatalogPolicy`** + **`RetentionRules`** — declarative config loaded from `catalog_policy.yaml` at indexer startup. Tells the indexer which S3 keys to react to and how to map JSONPath expressions into catalog columns. (`CatalogSourceRule` is defined alongside the indexer in §4.4.)
+**Storage abstraction (`store`):** workers receive a `store` handle that abstracts S3 (or local FS in mock) reads/writes/lists. The handle's implementation lives in the tooling repo for `reach_build` and `reach_scenario_run`; in pipeline code for `reach_scenario_set` and `indexer`.
 
----
+### 3.1 `reach_build`
 
-## 4. Worker function signatures
-
-Workers are **stateless functions** with the same shape: `(context, inputs) → outputs + side-effects-to-S3`. Return values are small JSON-serializable summaries used by the orchestrator. The three reach workers (`reach_build`, `reach_scenario_set`, `reach_scenario_run`) never touch the DB; only the `indexer` writes to the catalog.
-
-### 4.1 `reach_build`
+**Owner:** signature = pipeline contract; implementation = tooling (opaque to pipeline per PR #73 #9).
 
 ```python
 def reach_build(
@@ -285,14 +307,15 @@ class ReachBuildResult:
     status: Literal["built", "reused"]
 ```
 
-### 4.2 `reach_scenario_set`
+### 3.2 `reach_scenario_set`
+
+**Owner:** pipeline (signature + implementation), per PR #73 #11. Will likely refactor with Dewberry later (PR #73 #13, #15).
 
 ```python
 def reach_scenario_set(
     reach_id: int,
     model_manifest_hash: str,
     *,
-    nd_run_uris: list[str],    # the ND run.manifest.json paths from prior step
     aep_targets: list[str],     # e.g. ["Q100", "Q500"]
     kwse_strategy: KwseStrategy,
     store: Store,
@@ -300,14 +323,17 @@ def reach_scenario_set(
     """
     Plan the KWSE sweep for this reach given ND run outputs.
 
-    Pure-ish: reads ND results + AEP target values and emits an ordered
-    list of run orders. Inputs to the function are NOT ScenarioOrder
-    objects — those are the *output* shape, produced internally from
-    `aep_targets` and `kwse_strategy`.
+    Stateless: the worker discovers prior ND results by listing S3 under
+    results/reach={reach_id}/{model_manifest_hash}/.../q=*/kwse=ND/
+    rather than receiving pre-computed URIs as a parameter
+    (PR #73 #12 — "We want to be stateless, so I would suggest we just
+    read paths from S3").
 
-    Side effects: optional — may write a scenarios.json snapshot at
-    models/reach=<id>/<manifest_hash>/scenarios/<scenario_set_hash>.json
-    for traceability. See §1 storage layout.
+    No persisted side effects. The ScenarioSet is returned in-memory to
+    the orchestrator and is NOT written to S3. Scenarios are implicit —
+    a pure function of (aep_targets, ds_kwse from listed ND runs,
+    kwse_strategy) and can be recomputed at any time
+    (PR #73 #4, #14).
 
     Result: ScenarioSet(reach_id, model_manifest_hash, scenario_set_hash,
     orders: list[ScenarioOrder]).
@@ -327,7 +353,7 @@ class KwseStrategy:
 @dataclass(frozen=True)
 class ScenarioOrder:
     q_label: str
-    q_value_cfs: float
+    q_value_cms: float
     kwse_label: str
     kwse_value_ft: float
     hotstart_uri: str | None  # path to prior scenario's depth.tif
@@ -340,7 +366,9 @@ class ScenarioSet:
     orders: list[ScenarioOrder]
 ```
 
-### 4.3 `reach_scenario_run`
+### 3.3 `reach_scenario_run`
+
+**Owner:** signature = pipeline contract; implementation = tooling (opaque to pipeline per PR #73 #9).
 
 ```python
 def reach_scenario_run(
@@ -394,7 +422,13 @@ class RunResult:
     converged: bool
 ```
 
-### 4.4 `indexer`
+### 3.4 `indexer`
+
+**Owner:** pipeline (signature + implementation).
+
+**Catalog abstraction (`catalog`):** the indexer takes a `catalog` handle abstracting the backend — SQLite in the mock, Postgres in production. The handle supports `upsert(table, row, keys)` and `query(sql, params)`; only the indexer writes, consumers (`flows2fim`, web viewer) query.
+
+**`CatalogPolicy` and `RetentionRules`:** declarative config loaded from `catalog_policy.yaml` at indexer startup. Tells the indexer (a) which S3 keys to react to, (b) how to map JSONPath expressions from `run.manifest.json` fields into catalog columns, and (c) retention rules for derived data (e.g., `derived_data_days: 30` for `models/.../rasters/`).
 
 ```python
 def indexer(
