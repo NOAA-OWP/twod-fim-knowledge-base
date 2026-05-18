@@ -11,10 +11,10 @@ Strawmen for design review. This file specifies:
 Per PR #73 review, the pipeline repo owns *orchestration and reaction*; the tooling repo owns *what artifacts are and how they get built*. Concretely:
 
 **Pipeline owns:**
-- Worker function *signatures* and orchestration contracts (what goes in / comes out / idempotency).
+- Orchestration contracts around worker function signatures (what goes in / comes out / idempotency). Signatures are tooling-defined; if they change, pipeline must adapt (PR #73 #28).
 - `reach_scenario_set` as a pipeline function (first iteration — PR #73 comment #11: *"I think in first iteration, we can consider this a pipeline function. So this one does belong to pipeline."*).
 - The indexer.
-- Sensors (`override_added_sensor`, `run_manifest_landed_sensor`, etc.) — see [`triggers-and-invalidation.md`](triggers-and-invalidation.md).
+- Sensors (`override_added_sensor`, `run_manifest_landed_sensor`, etc.) — see [`triggers-and-propagation.md`](triggers-and-propagation.md).
 - **Network propagator** — given a new `run.manifest.json` for reach R, discover upstream reaches whose runs depended on R's prior outputs and trigger their new partitions. Multi-hop. **Proposed design (TBD pending team review):** two complementary discovery mechanisms — *(a) topology graph walk* yields candidate upstream reaches with bounded fan-out; *(b) catalog lookup on `boundary_conditions[].source.from_run_hash`* confirms which candidates actually need re-running (vs. those already pointing at the new R hash or sampled from a different downstream version). Topology alone over-fires; catalog alone over-scans. See triggers spec for detailed algorithm (still being designed). *Pipeline requirement on the tooling schema: for mechanism (b), `run.manifest.json`'s TRANSFER BC source must carry upstream-discoverable pointers (e.g., `from_run_hash`) — coordinate with tooling on the minimum field set. Without them, propagation falls back to topology-only and over-fires.*
 - **Trigger consolidator** — given multiple triggers arriving close in time (or while related work is in flight), decide whether to coalesce, queue, or kill in-flight. Algorithm TBD (see triggers spec).
 - S3 path *conventions* at the contract level (so the pipeline knows where to watch).
@@ -33,7 +33,7 @@ Sections below that describe schema fields and dataclass shapes are kept for con
 
 1. **Field set in each manifest** — *Moved to tooling repo (PR #73 #1).*
 2. **Hash exclusion rule** — *Moved to tooling repo (PR #73 #2).*
-3. **Override semantics** — concretely: an override is one folder containing exactly `patch.tif` + `manifest.yaml`, and each folder = one independent patch package. The pipeline treats the folder as the indivisible unit when it fires `override_added`. Is this understanding correct?
+3. **Override semantics** — *Deferred. "leave override as unresolved for now" (PR #73 #29, 2026-05-15).* Mock uses minimal placeholder without committing to folder structure or patch semantics.
 4. ~~**TRANSFER BC source pointer**~~ — *Moved to tooling repo (schema concern). Pipeline-side requirement noted in the Network propagator bullet above.*
 5. ~~**`scenarios.json` persistence**~~ — *Decided: scenarios are implicit (PR #73 #4, #14).*
 
@@ -79,7 +79,7 @@ All paths sit under a single root configurable via `STORE_ROOT` (real S3 bucket 
 | `{model_manifest_hash}` | str | same as `{manifest_hash}` of the model this run targets | `f4a9bc12d6e80f3a` |
 | `{run_hash}` | str | first 16 hex chars of `sha256(canonical_json(run.manifest.json))` | `1c8e44b9a2305f7d` |
 | `{q_label}` | str | Return-period label per `guide.md` example (e.g. `Q100` = 100-year recurrence interval). PR #73 #5 raised an alternate `q_{value_cms}` form ("for 200 cms `q_200` or `f_200`"); path convention follows `guide.md` until that change lands explicitly. | `Q100` |
-| `{kwse_label}` | str | decimal with one fractional digit | `2.5` |
+| `{kwse_label}` | str | decimal with one fractional digit, or `ND` for normal-depth baseline runs | `2.5`, `ND` |
 
 **Path builder**: s3 paths are constructed via python script. Producers and consumers MUST use it — never hand-format a path.
 
@@ -229,11 +229,13 @@ Lives at `results/reach={reach_id}/{model_manifest_hash}/{run_hash}/q={q}/kwse={
 
 Hash rule mirrors `model.manifest.json`: exclude `outputs`, `execution`, `created_at` from the hashed canonical form. Inputs include `model_manifest_hash`, `run_type`, `scenario`, `boundary_conditions`, `solver` (image digest etc.).
 
+**Open question — `hotstart_uri` and `run_hash`:** `hotstart_uri` currently lives in `execution.hotstart_from` (excluded from hash). This assumes the hotstart is a convergence optimization — same scenario should produce the same result regardless of initial condition. But hydrologically, different initial conditions can produce different results if the solver doesn't fully converge or if multiple stable states exist. Whether `hotstart_uri` should be part of `run_hash` depends on whether the 2d model guarantees convergence to the same steady state regardless of starting condition. **Needs team / Dewberry input.** Mock currently excludes `hotstart_uri` from `run_hash`.
+
 ---
 
 ## 3. Worker function signatures
 
-**Owner:** signatures = pipeline contract. Implementations split per function (see each subsection).
+**Contract:** signatures are tooling-defined; pipeline depends on them and must adapt when they change (PR #73 #28). Implementations split per function (see each subsection).
 
 Workers are **stateless functions**: `(inputs) → side-effects-to-S3`. They take inputs, produce S3 artifacts, and that's it. The three reach workers (`reach_build`, `reach_scenario_set`, `reach_scenario_run`) never touch the DB; only the `indexer` writes to the catalog.
 
@@ -243,7 +245,7 @@ Workers are **stateless functions**: `(inputs) → side-effects-to-S3`. They tak
 
 ### 3.1 `reach_build`
 
-**Owner:** signature = pipeline contract; implementation = tooling (opaque to pipeline per PR #73 #9).
+**Contract:** signature tooling-defined, pipeline adapts (PR #73 #28); implementation = tooling (opaque per PR #73 #9).
 
 ```python
 def reach_build(
@@ -290,8 +292,7 @@ class RoughnessSource:
 
 @dataclass(frozen=True)
 class OverrideRef:
-    name: str
-    uri: str  # relative to STORE_ROOT
+    name: str  # uri derived via s3_paths.override_dir(reach_id, name)
 
 @dataclass(frozen=True)
 class DomainSpec:
@@ -340,6 +341,8 @@ def reach_scenario_set(
     """
 ```
 
+**Mock simplification:** per PR #73 #4, scenarios are "a function of (min_flow, max_flow, ds_kwse, system_configs)." In production, `ds_kwse` (the downstream known water surface elevation from ND results) may inform the KWSE sweep range. In the mock, the sweep range comes entirely from the static `kwse_strategy` config; ND results are used only to discover which `q_label` values exist, not to derive sweep parameters.
+
 Supporting dataclasses:
 
 ```python
@@ -368,13 +371,17 @@ class ScenarioSet:
 
 ### 3.3 `reach_scenario_run`
 
-**Owner:** signature = pipeline contract; implementation = tooling (opaque to pipeline per PR #73 #9).
+**Contract:** signature tooling-defined, pipeline adapts (PR #73 #28); implementation = tooling (opaque per PR #73 #9).
 
 ```python
 def reach_scenario_run(
     reach_id: int,
     model_manifest_hash: str,
     run_type: Literal["nd", "kwse"],
+    q_label: str,
+    q_value_cms: float,
+    kwse_label: str,
+    kwse_value_ft: float,
     boundary_conditions: list[BoundaryCondition],
     solver: SolverSpec,
     hotstart_uri: str | None,
