@@ -8,30 +8,17 @@
 
 ## Key Design Principles
 
-<<<<<<< HEAD
-- The System is designed with database as the brain plus pipeline as a reconciliation loop
-- Pipeline has main goal of reconciling current state towards desired state
-
-- Jobs are stateless, they intake JSON, output JSON. They write to S3
-- Jobs do not interact with Database
-- Pipeline is the sole writer/editor to deployed system, no external updates are allowed
-=======
 - The System is designed with database as the brain plus orchestrator as a reconciliation loop
 - Orchestrator has main goal of reconciling current state towards desired state
 - The reconciliation loop is borrowed from Kubernetes; it makes the system self-healing. A controller watches S3 and forms the current state; when it sees a difference between current_state and desired_state it acts, then writes what it observed back into current_state, then watches again. The loop never stops.
 - Jobs are stateless, they intake JSON, output JSON. They write to S3
 - Jobs do not interact with Database
 - Orchestrator is the sole writer/editor to deployed system, no external updates are allowed
->>>>>>> origin/main
 - User updates come through override system
 - Deployed system does not entertain testing, testing should be carried out separately and desired state must be updated via overrides or updates to desired state table
 - Inputs are versioned
 - Outputs are immutable and stored at addressed paths (A rerun with same inputs will overwrite the old content)
-<<<<<<< HEAD
-- As pipeline try to bridge gap between current state and desired state it skips what already exist and runs only the gap between two states. This is done through addressed paths.
-=======
 - As orchestrator try to bridge gap between current state and desired state it skips what already exist and runs only the gap between two states. This is done through addressed paths.
->>>>>>> origin/main
 - If the desired state changed and existing outputs become stale, they are handled by S3 lifecycle policies
 - Self documenting paths
 - Operational Unit is per reach folder. Someone can `aws s3 sync` one reach to a laptop and have everything to inspect or rerun
@@ -50,17 +37,12 @@
 - Desired state = input to system = authored intent
 - Current state = what's actually been achieved = current state of the system
 - Runs = the per-run record (ledger)
-<<<<<<< HEAD
-- Rollback = revert desired state; content-addressing reuses prior outputs if not yet aged out, else will be recomputed
-
-=======
 - Some desired_state fields are nullable — NULL means "use the default source", a value means it is authored. current_state always holds the effective value. This separation makes it clear that there is one place to author anything, one place place to read what's live.
 - Rollback = revert desired state; content-addressing reuses prior outputs if not yet aged out, else will be recomputed
 
 ![alt text](<diagrams-system-landscape.png>)
 
 
->>>>>>> origin/main
 ## Versioning Model
 
 - When we store in S3 we store by repo version, (minor updates can live together, but major can not)
@@ -110,8 +92,6 @@ s3://twod-fim/
                     	└── run.json            self-describing run record (records domain used)
 ```
 
-<<<<<<< HEAD
-=======
 ## Repo Layout
 
 ![alt text](diagrams-repos-and-ownership.png)
@@ -121,17 +101,12 @@ s3://twod-fim/
 
 ![alt text](diagrams-run-sequence.png)
 
->>>>>>> origin/main
 ## Open Questions
 
 - How does worker wait for last scenario of downstream reach to finish?
     Possibly by waiting for `state_synced=true`
 - Do we want more granular control over desired kwse state
 - How do we track nominal KWSE rasters
-<<<<<<< HEAD
-- Does PSQL trigger Pipeline or Pipeline watches PSQL
-=======
 - Does PSQL trigger orchestrator or orchestrator watches PSQL
->>>>>>> origin/main
 - How do AWS Batch runs DIND
 - Network traversal order
