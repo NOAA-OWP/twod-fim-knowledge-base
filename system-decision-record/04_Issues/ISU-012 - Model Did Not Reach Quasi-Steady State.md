@@ -1,0 +1,2 @@
+
+Model results appear different than the results if the model had been allowed to continue running.  This may indicate that the reach is still filling or still draining, or more generally, that water surface elevations are still equalizing. Failure to reach quasi-steady state may indicate inaccurate inundation extent and depth estimates.

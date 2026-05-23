@@ -7,3 +7,4 @@ qgis/template_attachments.zip
 qgis/template.qgs~
 cases/
 *.drawio.bkp
+*.drawio.dtmp
