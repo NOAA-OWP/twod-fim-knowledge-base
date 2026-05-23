@@ -10,6 +10,7 @@
 
 - The System is designed with database as the brain plus pipeline as a reconciliation loop
 - Pipeline has main goal of reconciling current state towards desired state
+
 - Jobs are stateless, they intake JSON, output JSON. They write to S3
 - Jobs do not interact with Database
 - Pipeline is the sole writer/editor to deployed system, no external updates are allowed
@@ -17,7 +18,8 @@
 - Deployed system does not entertain testing, testing should be carried out separately and desired state must be updated via overrides or updates to desired state table
 - Inputs are versioned
 - Outputs are immutable and stored at addressed paths (A rerun with same inputs will overwrite the old content)
-- If the desired state changed exiting outputs become stale and they are handled by S3 lifecycle policies
+- As pipeline try to bridge gap between current state and desired state it skips what already exist and runs only the gap between two states. This is done through addressed paths.
+- If the desired state changed and existing outputs become stale, they are handled by S3 lifecycle policies
 - Self documenting paths
 - Operational Unit is per reach folder. Someone can `aws s3 sync` one reach to a laptop and have everything to inspect or rerun
 - Stateless code i.e. function shaped, no load-mutate-save lifecycle
@@ -94,3 +96,4 @@ s3://twod-fim/
 - How do we track nominal KWSE rasters
 - Does PSQL trigger Pipeline or Pipeline watches PSQL
 - How do AWS Batch runs DIND
+- Network traversal order
