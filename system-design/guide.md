@@ -10,7 +10,6 @@
 
 - The System is designed with database as the brain plus pipeline as a reconciliation loop
 - Pipeline has main goal of reconciling current state towards desired state
-
 - Jobs are stateless, they intake JSON, output JSON. They write to S3
 - Jobs do not interact with Database
 - Pipeline is the sole writer/editor to deployed system, no external updates are allowed
@@ -38,6 +37,9 @@
 - Current state = what's actually been achieved = current state of the system
 - Runs = the per-run record (ledger)
 - Rollback = revert desired state; content-addressing reuses prior outputs if not yet aged out, else will be recomputed
+
+![alt text](<diagrams-system-landscape.png>)
+
 
 ## Versioning Model
 
@@ -87,6 +89,15 @@ s3://twod-fim/
                     	├── metadata.csv / parquet  metadata on artifacts
                     	└── run.json            self-describing run record (records domain used)
 ```
+
+## Repo Layout
+
+![alt text](diagrams-repos-and-ownership.png)
+
+
+## Basic Sequence
+
+![alt text](diagrams-run-sequence.png)
 
 ## Open Questions
 
