@@ -21,9 +21,11 @@ While the study is currently only piloted for sites along the Ohio River, this a
 ### ALT-C - Regression on LiDAR time-of-flight flow quantiles
 USGS LiDAR has metadata to record the time of lidar flight. For a given LiDAR survey, the USGS gages in the survey area can be retrieved, and the flow-duration curve quantile for that day could be retrieved. A regression for flow-duration curve on drainage area could then be created within the survey area, and the mean flow quantile from all gages could be used to map a discharge to every reach.
 
-Manning's equation could then be used to determine how much area below LiDAR would be needed to convey the predicted discharge at LiDAR flight time. A trapezoidal or rectangular channel shape could be assumed.  
+Manning's equation could then be used to determine how much area below LiDAR would be needed to convey the predicted discharge at LiDAR flight time. A trapezoidal or rectangular channel shape could be assumed.
 
 This approach was used by researchers at the University of Vermont.
+
+Implementation notes: requires a curated DEM/LiDAR metadata data product (per-tile flight dates and a DEM snapshot tied to each survey), and a regression because gaged coverage is not universal across all reaches.
 
 ![[DR-021 - FIG-001.png]]
 
@@ -41,5 +43,20 @@ Fathom’s Channel Solver uses computational fluid dynamics to calculate how lar
 ![[DR-021 - FIG-004.png|512]]
 
 Research Paper: https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2020WR028301
+
+### ALT-E - Flow reduction based on baseflow (NWM or USGS)
+#current
+
+Use a baseflow estimate (e.g., NWM long-term baseflow, USGS baseflow separation, or a low-flow quantile such as Q90/Q95) as a proxy for the discharge present in the channel at LiDAR flight time, and back out the missing below-LiDAR area via Manning's equation analogously to ALT-C.
+
+Unlike ALT-C, this does **not** use DEM/LiDAR time-of-flight metadata, so it cannot match the actual stage on the day of the survey. It is therefore a crude approximation — it will tend to be systematically wrong wherever the survey was flown well above or well below baseflow conditions — but it has the advantage of being applicable everywhere (no dependence on flight-date metadata or nearby gages) and of using nationally available datasets.
+
+Could be deployed as a fallback where ALT-C inputs (flight date, nearby gages) are missing.
+
+### ALT-G - Override with topobathymetric (TB) DEM where available
+
+Variant of ALT-A. Default to no special handling, but where a topobathymetric DEM (e.g., NOAA Coastal TBDEM, USGS 3DHP TBDEM tiles, USACE channel surveys) is available, substitute or merge it into the working DEM so the channel bottom is directly represented and no estimation is needed.
+
 ## Decision History
 - 2026-02-02: Retroactively document current approach (ALT-A)
+- 2026-05-08: Alt-G - Selected after a team meeting
