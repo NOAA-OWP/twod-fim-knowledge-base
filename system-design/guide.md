@@ -42,23 +42,48 @@
 
 ![alt text](<diagrams-system-landscape.png>)
 
-
 ## Versioning Model
 
 - When we store in S3 we store by repo version, (minor updates can live together, but major can not)
 - Each version is pinned to a commit in SDR
 
-## Key System Objects
+## Conceptual Modeling Objects
 
-### Model
+This is conceptual model of different objects in modeling, this is not a working database schema, neither these are Python data classes.
 
-#### Model Identity
+### Reach (id: reach_id)
+- reach_to_id
+- is_terminal
+- is_lake ??
+- is_headwater ??
 
-#### Model Domain
+### Model (id: model_identity_hash+domain_tag)
+- model_identity_hash
+- domain_tag ??
+- domain bbox geom
 
-### Scenario
+#### Model Identity (id: model_identity_hash)
+- override_id
+- `build_model` job version
+- dem_source (unique hash of source of date. ex usgs url + version)
+- roughness_source (unique hash of source of date. ex nld url + version)
+- reach_id
 
-### Run
+### Run (id: )
+- scenario
+- model_id
+- execution time
+- `runner` job version
+- solver
+- hotstart raster  (optional)
+- STL (optional)
+- KWSE transfer raster (optional)
+
+#### Scenario (id:)
+- q
+- bc_type
+- bc_value
+
 
 ## Storage Layout
 
@@ -96,7 +121,6 @@ s3://twod-fim/
 
 ![alt text](diagrams-repos-and-ownership.png)
 
-
 ## Basic Sequence
 
 ![alt text](diagrams-run-sequence.png)
@@ -104,7 +128,7 @@ s3://twod-fim/
 ## Open Questions
 
 - How does worker wait for last scenario of downstream reach to finish?
-    Possibly by waiting for `state_synced=true`
+  Possibly by waiting for `state_synced=true`
 - Do we want more granular control over desired kwse state
 - How do we track nominal KWSE rasters
 - Does PSQL trigger orchestrator or orchestrator watches PSQL
