@@ -9,47 +9,22 @@ Strawmen for design review. This file specifies:
 
 ## Scope: orchestrator vs tooling
 
-Per PR #73 review, the pipeline repo owns *orchestration and reaction*; the tooling repo owns *what artifacts are and how they get built*. Concretely:
+Architecture overview in [`orchestrator-design.md`](../orchestrator-design.md). This spec defines the contracts.
 
 **Orchestrator owns:**
-- Orchestration contracts around worker function signatures (what goes in / comes out / idempotency). Signatures are tooling-defined; if they change, the orchestrator must adapt (PR #73 #28).
-- `plan_scenarios` as an orchestrator function (first iteration — PR #73 comment #11: *"I think in first iteration, we can consider this a pipeline function. So this one does belong to pipeline."*). See Q10.
-- **State store** — DB access layer for `desired_state`, `current_state`, `runs`, `reach_network`, `overrides`. The orchestrator is the sole DB writer; workers never touch the DB.
-- **Reconciliation loop** — polls DB for `applied_revision < revision` gap, schedules work to close the gap, updates state when work completes. Replaces the event-driven sensor model.
-- **Network propagator** — given a completed run for reach R, discover upstream reaches whose runs depended on R's prior outputs and bump their `desired_state.revision`. Multi-hop. Two discovery mechanisms: *(a)* topology walk via `reach_network` table, *(b)* hash comparison via `runs.transfer_bc_from_run_hash`. See [`triggers-and-propagation.md` §3](triggers-and-propagation.md) for detailed algorithm.
-- **Trigger consolidation** — naturally coalesced by the reconciliation loop; multiple changes between ticks produce one gap computation. Kill in-flight if revision bumps during processing (see [`triggers-and-propagation.md`](triggers-and-propagation.md)).
-- S3 path *conventions* at the contract level (so the orchestrator knows where to read/write and consumers know where to find artifacts).
-- **DB schema ownership** — the orchestrator repo owns the schema definitions and migrations for all six tables.
+- Worker function signatures (what goes in / comes out / idempotency). Signatures are tooling-defined; orchestrator adapts.
+- `plan_scenarios` (renamed from `reach_scenario_set`).
+- State store, reconciliation loop, network propagator, trigger consolidation — see [`orchestrator-design.md`](../orchestrator-design.md).
+- S3 path conventions, DB schema ownership.
 
-**Orchestrator technology: Dagster.** Dagster's asset model maps directly to the reconciliation loop: assets have built-in "materialized vs stale" tracking (= desired vs current state), partitions map to `(reach_id, q, kwse)` tuples, and sensors can poll the DB for `applied_revision < revision` gaps. The DB-as-brain shift strengthens the case — Dagster sensors query the DB instead of scanning S3.
+**Tooling owns:**
+- Manifest schemas (`override.manifest.yaml`, `model.manifest.json`, `run.json`).
+- Hash rules.
+- Supporting dataclasses for `reach_build` inputs.
+- Internal implementation of `reach_build` and `reach_scenario_run` (opaque).
+- Path-builder script (`s3_paths.py`).
 
-**Tooling owns (defined in the tooling repo, referenced here):**
-- Manifest schemas — exact field set of `override.manifest.yaml`, `model.manifest.json`, `run.json` (PR #73 #1: *"this would be in the scope of our tooling repo"*; #6 and #7 on the schemas: *"This will be useful for when Scott would work towards creating this, I think this is beyond pipeline scope"*).
-- Hash rules — what is excluded from the canonical-JSON hash (PR #73 #2: *"should be dealt with in the scope of other repo"*).
-- Supporting dataclasses for `reach_build` inputs (`HydrofabricRef`, `DemSource`, `RoughnessSource`, `OverrideRef`, `DomainSpec`, etc.) (PR #73 #10: *"Beyond the scope of pipeline"*).
-- Internal implementation of `reach_build` and `reach_scenario_run` — the orchestrator treats these as opaque black boxes (PR #73 #9: *"the pipeline should consider these functions opaque"*).
-- *Inferred (not directly addressed in PR):* the path-builder script (`s3_paths.py`) — same domain as the schemas.
-
-Sections below that describe schema fields and dataclass shapes are kept for context but are slated to move to the tooling repo once that spec exists.
-
-## What feedback I'm seeking
-
-1. **Field set in each manifest** — *Moved to tooling repo (PR #73 #1).*
-2. **Hash exclusion rule** — *Moved to tooling repo (PR #73 #2).*
-3. **Override semantics** — *Deferred. "leave override as unresolved for now" (PR #73 #29, 2026-05-15).* Mock uses minimal placeholder without committing to folder structure or patch semantics.
-4. ~~**TRANSFER BC source pointer**~~ — *Moved to tooling repo (schema concern). Pipeline-side requirement noted in the Network propagator bullet above.*
-5. ~~**`scenarios.json` persistence**~~ — *Decided: scenarios are implicit (PR #73 #4, #14).*
-6. **DB schema review** — six tables defined in §2 (`reach_network`, `desired_state`, `current_state`, `runs`, `overrides`, `metadata`). Review column set, types, and constraints.
-7. **Revision semantics** — `desired_state.revision` increments on each change; `current_state.applied_revision` records last applied. Is a simple integer sufficient, or do we need finer-grained tracking?
-8. **Nullable fields policy** — `desired_state` allows NULLs (meaning "use default source"); `current_state` is all NOT NULL (holds effective values). Which specific `desired_state` fields are nullable?
-9. **Path format** — guide uses `z=283/f=200` and `z=nd/f=200`; prior spec used `q=Q100/kwse=2.5`. What are z and f? Units?
-10. **`plan_scenarios` vs `reach_scenario_set`** — repos diagram shows `plan_scenarios`. Is this a rename?
-11. **`run.json` vs `run.manifest.json`** — guide and diagrams consistently use `run.json`. Confirm naming.
-12. **Override stacking vs replacing** — `overrides` table allows multiple per reach (composite PK). Can multiple overrides be active simultaneously, or does each replace the previous?
-13. **Current state formation** — does orchestrator verify S3 to form `current_state`, or trust job completion signals? Guide says "controller watches S3 and forms the current state." See `triggers-and-propagation.md` §2.1 for proposed approach.
-14. **Model path separator** — `hash(model_identity)+domain_geohash` — is `+` a literal character in the S3 path?
-15. **`desired_state_log`** — production audit log table described conceptually. Mock uses `updated_at`/`updated_by` on `desired_state` directly. Confirm this is sufficient for now.
-16. ~~**Catalog "current" semantics**~~ — *Resolved by `revision`/`applied_revision` in the DB-as-brain architecture.*
+Schemas and dataclasses below are kept for context until the tooling spec exists.
 
 ---
 
@@ -76,12 +51,12 @@ All paths sit under a single root configurable via `STORE_ROOT` (real S3 bucket 
             ├── depth.tif             # COG, EPSG:5070; also hotstart seed
             ├── stl.geojson           # Stage Transfer Line
             ├── metadata.csv / parquet
-            └── run.json              # PUT LAST — completion event (see Q11)
+            └── run.json              # PUT LAST — completion event
 ```
 
 **Identity vs realization.** Model = model_identity (reach + methodology + overrides) + realization (domain). Run = run_identity (engine + engine version) + realization (scenario: z, f). Identity and realization are always separate in hashes and DB columns, so runs with the same model_identity stay valid even if the domain changes.
 
-**Open path questions:** see Q9 (z/f format and units) and Q14 (`+` separator confirmation).
+**Note:** `+` separator in model path TBD (literal character or notation).
 
 **Conventions:**
 
@@ -93,8 +68,8 @@ All paths sit under a single root configurable via `STORE_ROOT` (real S3 bucket 
 | `{model_identity_hash}` | str | hash of model identity (reach + methodology + overrides) | `f4a9bc12d6e80f3a` |
 | `{domain_geohash}` | str | hash of domain realization (bbox, resolution, CRS) | `a7c31e09` |
 | `{run_identity_hash}` | str | hash of run identity (engine + engine version) | `1c8e44b9a2305f7d` |
-| `{z_label}` | str | scenario z-axis label; `nd` for normal-depth baseline runs (see Q9) | `283`, `nd` |
-| `{f_label}` | str | scenario f-axis label (see Q9) | `200` |
+| `{z_label}` | str | elevation (KWSE); `nd` for normal-depth baseline runs. Consistent with ripple1d. | `283`, `nd` |
+| `{f_label}` | str | flow (Q) in cms. Consistent with ripple1d. | `200` |
 
 **Path builder**: all S3 paths MUST be constructed via the path-builder script — never hand-format a path.
 
@@ -102,7 +77,7 @@ All paths sit under a single root configurable via `STORE_ROOT` (real S3 bucket 
 
 ## 2. DB schema
 
-**Owner:** orchestrator. Backend: SQLite in mock, Postgres in production. See Q6 for review of column set, types, and constraints.
+**Owner:** orchestrator. Backend: SQLite in mock, Postgres in production.
 
 ### 2.1 `reach_network`
 
@@ -121,7 +96,7 @@ CREATE TABLE reach_network (
 
 ### 2.2 `desired_state`
 
-Authored intent — what the system should produce. Nullable fields mean "use default source"; a value means it is authored (see Q8). `revision` bumps on every change (see Q7).
+Authored intent — what the system should produce. Nullable fields mean "use default source"; a value means it is authored. `revision` bumps on every change.
 
 ```sql
 CREATE TABLE desired_state (
@@ -131,7 +106,7 @@ CREATE TABLE desired_state (
     initial_dq_step_for_nd                REAL,
     solver                                TEXT,
     model_domain                          GEOMETRY,    -- bbox of the model domain
-    override_id                           TEXT,            -- see Q12 (stacking vs replacing); FK deferred until resolved
+    override_id                           TEXT REFERENCES overrides(override_id),
     sdr_commit                            TEXT,
     library_density_mean_stage_threshold  REAL,
     library_density_max_stage_threshold   REAL,
@@ -149,7 +124,7 @@ CREATE TABLE desired_state (
 
 ### 2.3 `current_state`
 
-What the system has actually achieved. Part derived cache (from runs), part orchestrator state (`processing`). All columns NOT NULL — holds effective values. Reconciliation check: `WHERE applied_revision < (SELECT revision FROM desired_state WHERE reach_id = current_state.reach_id)`.
+What the system has actually achieved. Part derived cache (from runs), part orchestrator state (`processing`). All columns NOT NULL — holds effective values. Reconciliation check: reaches in `desired_state` that have no `current_state` row (cold start) or `applied_revision < revision`.
 
 `model_hash` = `{model_identity_hash}+{domain_geohash}` — the same string used as the S3 folder name under `models/reach={reach_id}/`. Given a `model_hash`, we can construct the S3 path directly.
 
@@ -167,7 +142,7 @@ CREATE TABLE current_state (
 );
 ```
 
-How `current_state` is formed: see Q13 — guide says "controller watches S3 and forms the current state."
+How `current_state` is formed: orchestrator gets job completion signal, verifies S3 artifact exists, then updates DB.
 
 ### 2.4 `runs` (ledger)
 
@@ -200,18 +175,15 @@ CREATE TABLE runs (
 
 ### 2.5 `overrides`
 
-User-authored patches applied to reach models. Composite PK allows multiple overrides per reach (see Q12 — stacking vs replacing).
+User-authored patches applied to reach models. A reach can have multiple overrides; `desired_state.override_id` references a single override.
 
 ```sql
 CREATE TABLE overrides (
+    override_id TEXT PRIMARY KEY,
     reach_id    INTEGER NOT NULL REFERENCES reach_network(reach_id),
-    override_id TEXT NOT NULL,
-    created_at  TIMESTAMP NOT NULL,  -- added: provenance
-    created_by  TEXT NOT NULL,       -- added: provenance
-    description TEXT,                -- added: human-readable context
-    patch_kind  TEXT NOT NULL CHECK (patch_kind IN ('dem', 'roughness', 'vector')),  -- added: type of patch
-    s3_uri      TEXT NOT NULL,       -- added: location of override artifacts in S3
-    PRIMARY KEY (reach_id, override_id)
+    created_at  TIMESTAMP NOT NULL,
+    created_by  TEXT NOT NULL,
+    description TEXT
 );
 ```
 
@@ -221,7 +193,7 @@ Placeholder table(s) — `reach_id` PK. Schema TBD.
 
 ### 2.7 `desired_state_log` (proposed — production only)
 
-Append-only audit log for `desired_state` changes. Not implemented in the mock — mock uses `updated_at`/`updated_by` on `desired_state` directly (see Q15).
+Append-only audit log for `desired_state` changes. Not implemented in the mock — mock uses `updated_at`/`updated_by` on `desired_state` directly.
 
 ```sql
 CREATE TABLE desired_state_log (
@@ -323,17 +295,18 @@ Lives at `models/reach={reach_id}/{model_identity_hash}+{domain_geohash}/manifes
 }
 ```
 
-**Hash rule.** `model_identity_hash` is sha256 over **canonicalized** JSON. When computing the hash, the `outputs.*` fields, `created_at`, and `built_by` are **excluded**.
+**Hash rule.** `model_identity_hash` is sha256 over **canonicalized** JSON. When computing the hash, `domain.*`, `outputs.*`, `created_at`, and `built_by` are **excluded** (domain is realization, not identity).
 
 ### 3.3 `run.json`
 
-Lives at `results/reach={reach_id}/{model_identity_hash}/{run_identity_hash}/z={z}/f={f}/run.json` (see Q11 — naming confirmed as `run.json`). **PUT LAST.** Content-addressed by `run_identity_hash`.
+Lives at `results/reach={reach_id}/{model_identity_hash}/{run_identity_hash}/z={z}/f={f}/run.json` **PUT LAST.** Content-addressed by `run_identity_hash`.
 
 ```json
 {
   "schema_version": 1,
   "reach_id": 12345,
   "model_identity_hash": "f4a9bc12d6e80f3a",
+  "model_hash": "f4a9bc12d6e80f3a+a7c31e09",
   "run_identity_hash": "1c8e44b9a2305f7d",
 
   "run_type": "kwse",                          // "nd" | "kwse"
@@ -385,13 +358,11 @@ Lives at `results/reach={reach_id}/{model_identity_hash}/{run_identity_hash}/z={
 
 Hash rule mirrors `model.manifest.json`: exclude `outputs`, `execution`, `created_at` from the hashed canonical form. Inputs include `model_identity_hash`, `run_type`, `scenario`, `boundary_conditions`, `solver` (image digest etc.).
 
-**Open question — `hotstart_uri` and `run_identity_hash`:** `hotstart_uri` currently lives in `execution.hotstart_from` (excluded from hash). This assumes the hotstart is a convergence optimization — same scenario should produce the same result regardless of initial condition. But hydrologically, different initial conditions can produce different results if the solver doesn't fully converge or if multiple stable states exist. Whether `hotstart_uri` should be part of `run_identity_hash` depends on whether the 2d model guarantees convergence to the same steady state regardless of starting condition. **Needs team / Dewberry input.** Mock currently excludes `hotstart_uri` from `run_identity_hash`.
-
 ---
 
 ## 4. Worker function signatures
 
-**Contract:** signatures are tooling-defined; the orchestrator depends on them and must adapt when they change (PR #73 #28). Implementations split per function (see each subsection).
+**Contract:** signatures are tooling-defined; the orchestrator adapts when they change.
 
 Workers are **stateless functions**: `(inputs) → S3 artifacts`.
 
@@ -401,7 +372,7 @@ Workers are **stateless functions**: `(inputs) → S3 artifacts`.
 
 ### 4.1 `reach_build`
 
-**Contract:** signature tooling-defined, orchestrator adapts (PR #73 #28); implementation = tooling (opaque per PR #73 #9).
+**Contract:** signature tooling-defined, orchestrator adapts; implementation = tooling (opaque).
 
 ```python
 def reach_build(
@@ -466,7 +437,7 @@ class ReachBuildResult:
 
 ### 4.2 `plan_scenarios`
 
-**Owner:** orchestrator (signature + implementation), per PR #73 #11. Will likely refactor with Dewberry later (PR #73 #13, #15). See Q10 — renamed from `reach_scenario_set`.
+**Owner:** orchestrator (signature + implementation). Renamed from `reach_scenario_set`.
 
 ```python
 def plan_scenarios(
@@ -482,22 +453,19 @@ def plan_scenarios(
 
     Stateless: the worker discovers prior ND results by listing S3 under
     results/reach={reach_id}/{model_identity_hash}/.../z=nd/
-    rather than receiving pre-computed URIs as a parameter
-    (PR #73 #12 — "We want to be stateless, so I would suggest we just
-    read paths from S3").
+    rather than receiving pre-computed URIs as a parameter.
 
     No persisted side effects. The ScenarioSet is returned in-memory to
     the orchestrator and is NOT written to S3. Scenarios are implicit —
     a pure function of (aep_targets, ds_kwse from listed ND runs,
-    kwse_strategy) and can be recomputed at any time
-    (PR #73 #4, #14).
+    kwse_strategy) and can be recomputed at any time.
 
     Result: ScenarioSet(reach_id, model_identity_hash, scenario_set_hash,
     orders: list[ScenarioOrder]).
     """
 ```
 
-**Mock simplification:** per PR #73 #4, scenarios are "a function of (min_flow, max_flow, ds_kwse, system_configs)." In production, `ds_kwse` (the downstream known water surface elevation from ND results) may inform the KWSE sweep range. In the mock, the sweep range comes entirely from the static `kwse_strategy` config; ND results are used only to discover which flow values exist, not to derive sweep parameters.
+**Mock simplification:** scenarios are "a function of (min_flow, max_flow, ds_kwse, system_configs)." In production, `ds_kwse` (the downstream known water surface elevation from ND results) may inform the KWSE sweep range. In the mock, the sweep range comes entirely from the static `kwse_strategy` config; ND results are used only to discover which flow values exist, not to derive sweep parameters.
 
 Supporting dataclasses:
 
@@ -527,7 +495,7 @@ class ScenarioSet:
 
 ### 4.3 `reach_scenario_run`
 
-**Contract:** signature tooling-defined, orchestrator adapts (PR #73 #28); implementation = tooling (opaque per PR #73 #9).
+**Contract:** signature tooling-defined, orchestrator adapts; implementation = tooling (opaque).
 
 On completion, the orchestrator reads `run.json`, records the run in the `runs` ledger, and updates `current_state`.
 
