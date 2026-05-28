@@ -56,18 +56,20 @@ This is conceptual model of different objects in modeling, this is not a working
 - is_terminal
 - is_lake ??
 - is_headwater ??
+- geom
 
 ### Model (id: model_identity_hash+domain_tag)
 - model_identity_hash
 - domain_tag ??
 - domain bbox geom
 
-#### Model Identity (id: model_identity_hash)
+#### Model Identity (id: hash of content)
 - override_id
 - `build_model` job version
 - dem_source (unique hash of source of date. ex usgs url + version)
 - roughness_source (unique hash of source of date. ex nld url + version)
 - reach_id
+- reach_geom
 
 ### Run (id: )
 - scenario
