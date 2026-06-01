@@ -1,5 +1,7 @@
 ## Description
-Per [[DR-031 - Should Downstream Stage be Uniform or Cell-Specific Along the STL]], downstream boundary conditions are drawn from completed downstream reach simulations. Each such simulation is attributed a nominal water surface elevation. This decision addresses how to select the subset of downstream simulations to use as boundary conditions for the current reach, so that the resulting library spans a useful range of downstream conditions without an unmanageable number of runs.
+Per [[DR-031 - Should Downstream Stage be Uniform or Cell-Specific Along the STL]], downstream boundary conditions are drawn from completed downstream reach simulations. Per [[DR-032 - What Should be the Lower and Upper KWSE Bound for Each Reach for Each Discharge]] we will have a range of for d/s KWSE to work with, but within that range multiple simulations will exist producing many KWSEs. Each such simulation is attributed a nominal water surface elevation. 
+
+This decision addresses how to select the library values of downstream KWSEs to use as KWSE set for the current reach, so that the resulting library spans a useful range of downstream conditions without a large number of runs.
 
 ## Alternatives
 
@@ -12,12 +14,14 @@ ds_interval = len(ds_scenarios) // ds_resolution
 ds_space = ds_scenarios[::ds_interval]
 ```
 
-### ALT-B - Fixed Delta Elevation Across All Reaches
-Select downstream scenarios whose nominal elevations fall closest to a fixed stage increment (e.g., every 0.5 m). One stage increment applied uniformly across all CONUS reaches is a one-size-fits-none approach: too coarse for flat coastal plains and small rivers, too fine for mountainous canyons and large rivers. Requires a national calibration effort and will remain inaccurate across diverse geographies.
+### ALT-B - Delta Value Rounded to Nearest Value
+#current
 
 ### ALT-C - Reach-Adaptive Delta Elevation Based on Stream Order or Drainage Area
-#current
+
+*I think this is under developed alternative, an alternate here could be same as adaptive step for Q*
+
 Estimate an appropriate stage increment for each reach using stream order or drainage area, then select scenarios matching that increment. This provides an easily-documented increment but requires a national regression or lookup analysis that will be inaccurate in edge-case geographies and require added investigation effort.
 
 ## Decision History
-- 2026-06-01: ALT-C selected based on assumed client preference
+- 2026-06-01: ALT-B selected based on assumed client preference

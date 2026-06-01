@@ -1,5 +1,8 @@
 ## Description
-Given a set of selected upstream discharges (see [[DR-030 - Which Discharges should be modeled at Each Reach]]) and a set of selected downstream conditions (see [[DR-032 - Which Downstream Conditions Should be Modeled at Each Reach]]), this decision addresses which pairings of the two sets should actually be simulated.
+
+[[DR-001 - Should KWSE Scenario be Modeled or Not]] establish which reaches should have KWSE scenarios at all
+
+This DR establish what should be range of upper and lower bounds for KWSEs.
 
 Two analyses were perfomed to supplement this decision.
 
@@ -18,7 +21,7 @@ Two analyses were perfomed to supplement this decision.
 6. Plot the correlation between the two normalized timeseries.
 7. Compute the drainage area ratio for all adjacent reach pairs in NHD.
 
-![[DR-033 - FIG-001.jpeg]]
+![[DR-032 - FIG-001.jpeg]]
 
 **Results:**
 
@@ -41,10 +44,10 @@ The full cross-product contains many combinations that will never appear in a re
 
 *Note: The colored lines in these plots do not extend to the left of the normal-depth run. This was a hard-coded criterion in the Ripple1D pipeline, not an emergent hydraulic property.*
 
-![[DR-033 - FIG-002.png|697]]
-![[DR-033 - FIG-003.png]]
+![[DR-032 - FIG-002.png|697]]
+![[DR-032 - FIG-003.png]]
 
-![[DR-033 - FIG-004.png]]
+![[DR-032 - FIG-004.png]]
 **Results — Three behavioral regimes were identified:**
 
 - **Case 1 (normal-depth controlled):** For each discharge, the downstream depth has no measurable effect on upstream depth. The rating curves are flat horizontal lines. Modeling more than one downstream condition per discharge provides no additional information about the upstream water surface profile.
@@ -55,21 +58,20 @@ In high-gradient, normal-depth-controlled reaches, extensive downstream conditio
 
 ## Alternatives
 
-### ALT-A - Full Cross-Product of Selected Discharges and Downstream Conditions
+### ALT-A - Same as D/S Reach Max and Min STL WSEL Floored by Reach's Normal Depth WSEL at STL
 #current
 
-Simulate every combination of selected discharges and selected downstream conditions.
+For every reach's every discharge we model it with full range of D/S Reach U/S WSEL range, but we don't model any KWSE that is lower than the Reach's 
 
-```python
-return [BoundaryConditions(q, d) for q, d in itertools.product(q_space, ds_space)]
-```
-
-Straightforward to implement, test, and explain. Downstream and upstream selection already reduces total count; the cross-product of those reduced sets is manageable. Eliminates the risk of omitting a physically important combination due to a flawed sampling model.
+Straightforward to implement, test, and explain. . Eliminates the risk of omitting a physically important combination due to a flawed sampling model.
 
 ### ALT-B - Joint Probability Sampling
 Model the joint recurrence-interval distribution of upstream discharge and downstream stage. Sample more densely in high-probability regions and sparsely in low-probability regions. For large rivers with strongly correlated adjacent reaches, this would substantially reduce run count or concentrate fidelity in physically likely conditions. However, constructing a reliable joint distribution at CONUS scale introduces significant complexity and additional failure modes. A brute-force cross-product is preferred for now.
 
 ### ALT-C - Suppress Downstream Variation Where Backwater is Negligible
+
+This belongs in DR-001
+
 Identify reaches where upstream water surface elevation is insensitive to downstream stage at a given discharge (i.e., normal-depth-controlled or near-critical flow). For those reaches, simulate only a single downstream condition per discharge. This could reduce library size substantially for high-gradient reaches. Identification could use static reach attributes (slope, Froude estimates) or response curves from an initial set of runs. Analysis of Ripple1D rating curve data confirms that this behavior exists and is reach-dependent, but the identification logic adds complexity. Defaulting to ALT-A; this alternative remains viable if targeted cost reduction is required.
 
 ## Decision History

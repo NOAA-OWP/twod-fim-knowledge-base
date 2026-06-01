@@ -11,7 +11,7 @@ Apply one scalar water surface elevation across all cells on the STL. Analogous 
 
 Assign the water surface elevation at each STL cell from the corresponding raster output of the downstream reach's simulation for the matching scenario. Requires the downstream reach library to be completed before the upstream reach is processed.
 
-This preserves the full lateral water surface profile across the STL, including floodplain lobes, secondary channels, and backwater pockets. Each downstream simulation is attributed a nominal water surface elevation to identify and sort scenarios. That nominal value is used by [[DR-032 - Which Downstream Conditions Should be Modeled at Each Reach]] to select which downstream simulations to use as boundary conditions.
+This preserves the full lateral water surface profile across the STL, including floodplain lobes, secondary channels, and backwater pockets. Each downstream simulation is attributed a nominal water surface elevation to identify and sort scenarios. That nominal value is used by [[DR-033 - How to Determine Library KWSEs for Each Reach]] to select which downstream simulations to use as boundary conditions.
 
 ## Decision History
 - 2026-06-01: ALT-B selected to preserve accurate hydraulics.
