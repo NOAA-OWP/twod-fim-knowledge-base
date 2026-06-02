@@ -6,12 +6,9 @@ Each reach requires a minimum and maximum discharge to bound the simulation libr
 ### ALT-A - Fixed Recurrence Interval Bounds from NWM Retrospective
 #current
 
-Analyze National Water Model (NWM) retrospective flows to fit a flood frequency distribution (e.g., LP3) at each reach. Use the 5-year recurrence interval discharge as the lower bound and the 500-year recurrence interval discharge as the upper bound. This approach leverages existing national datasets, scales to all NHD reaches without manual tuning, and produces physically grounded bounds tied to flood frequency.
+Analyze National Water Model (NWM) retrospective flows to fit a flood frequency distribution (e.g., LP3) at each reach. Use the 0.9 x `high flow threshold` discharge as the lower bound and the 1.5 x 100-year recurrence interval discharge as the upper bound. This approach leverages existing national datasets, scales to all NHD reaches without manual tuning, and produces physically grounded bounds tied to flood frequency. This approach is exactly same as what was used to produce Ripple1D libraries.
 
-### ALT-B - User-Specified Fixed Discharge Bounds
-Operators define a single pair of discharge values applied uniformly to all reaches. Simple to implement but ignores the orders-of-magnitude variation in channel capacity across CONUS. Results in unnecessary low-flow runs on large rivers and missing high-flow coverage on small streams.
-
-### ALT-C - Channel Bankfull Discharge as Lower Bound
+### ALT-C - Channel Bankfull Discharge as Lower Bound with 500 year Discharge as Upper Bound
 Use an estimated bankfull discharge as the minimum, below which floodplain inundation is negligible. Requires a reliable bankfull estimation method at every reach; current national datasets have high uncertainty for this quantity.
 
 ## Decision History

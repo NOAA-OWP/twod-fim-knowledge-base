@@ -59,7 +59,7 @@ This separation means the band measures _cumulative_ change since the last libra
 
 #### Cons
  - Given the complexity, edge cases will require extensive review and debugging/patching. Implementation and maintenance burden is substantially higher than ALT-A or ALT-B.
- - Method for dq determination is under-developed. If a fixed value is used, are the resulting discharges substantially better in a way that justifies the added complexity relative to alternative A or B.
+ - Method for dq determination is needed separately.
  - Strictly sequential hot-starts eliminate parallelism—each run must complete before the next is proposed.
  - Adds another step to the production pipeline, increasing pipeline complexity and computational cost.
  - Strong safeguards will be necessary to prevent runaway iterations.
