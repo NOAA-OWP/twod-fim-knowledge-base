@@ -16,7 +16,7 @@ Modify the network against a `dead pool polygon` dataset (see [[DR-034 - What Da
 3. **Tag trimmed reaches.** Record why a reach was trimmed:
    - `lake_outlet = True` — reach exits the lake (lake is upstream of it).
    - `lake_inlet = True` — reach enters the lake (lake is downstream of it).
-1. **Inflow BC for lake outlets.** A `lake_outlet` reach has no `upstream mainstem reach` to receive inflow on (its upstream is the lake), so the standard placement in [[DR-013 - What Should be Geometry and Location of Input  BC]] does not apply. Even placing input BC line at the start the reach is problematic because the start of a reach downstream of lake could be inside the lake in the DEM. Place the inflow BC line within the reach at an offset distance downstream of its start. See [[DR-016 - What Upstream Offset Distance Should be Used for Inflow BC Line Placement]] for offset; the lake-outlet offset rule may warrant its own DR.
+4. **Inflow BC for lake outlets.** A `lake_outlet` reach has no `upstream mainstem reach` to receive inflow on (its upstream is the lake), so the standard placement in [[DR-013 - What Should be Geometry and Location of Input  BC]] does not apply. Even placing input BC line at the start the reach is problematic because the start of a reach downstream of lake could be inside the lake in the DEM. Place the inflow BC line within the reach at an offset distance downstream of its start. See [[DR-016 - What Upstream Offset Distance Should be Used for Inflow BC Line Placement]] for offset; the lake-outlet offset rule may warrant its own DR.
 
 
 ### ALT-B - Keep Reaches, Flag Only

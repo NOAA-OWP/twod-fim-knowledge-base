@@ -25,7 +25,7 @@ The negative of this approach is that it muddies the scope of Flows2FIM as lakes
 #### Open Questions
 - Does a lake get a `reach_id` from an existing (removed) reach, or a newly minted id?
 - Does the lake reach carry a geometry, and if so what (centerline through the pool, the dead pool polygon, a synthetic line)?
-### ALT-B Flows2FIM doesn't Cater Lake Reaches and Lakes are Treated as Breakpoints
+### ALT-B - Flows2FIM doesn't Cater Lake Reaches and Lakes are Treated as Breakpoints
 #current
 This alternative doesn't require any modification to Flows2FIM. Lake FIMs will be outside of F2F later with a simple lookup.
 

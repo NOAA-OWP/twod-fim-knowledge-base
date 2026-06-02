@@ -5,7 +5,7 @@ Lakes and coasts would be seeding points for Flows2FIM. The range of stage for t
 
 ### ALT-A - Lower Bound be Dead Pool Elevation
 #current
-Assumption is that we can get a dataset with dead pool polygon and corresponding sage available
+Assumption is that we can get a dataset with dead pool polygon and corresponding stage available.
 
 - Pro: better separation of concerns; lake extent is defined independently of DEM data.
 - Con: extent and DEM may disagree, which can leave gaps in the FIM at the lake margin.

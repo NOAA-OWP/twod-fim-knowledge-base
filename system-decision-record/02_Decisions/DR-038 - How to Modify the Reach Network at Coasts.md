@@ -2,8 +2,6 @@
 ## Description
 Define how the reach network is modified where it approaches coasts during the network modification phase. The goal is to stop modeling reach hydraulics near coasts where coastal models should provide FIMs.
 
-This decision depends on a coast Tide Levels dataset, see [[DR-034 - What Dataset Should be Used to Define Lakes]], and is related to how terminal reaches are classified.
-
 ## Alternatives
 
 ### ALT-A - Omit Reaches where Reach overlaps NOAA Tidal Surface Coverage
