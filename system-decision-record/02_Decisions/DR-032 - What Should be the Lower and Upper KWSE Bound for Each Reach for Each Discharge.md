@@ -4,7 +4,7 @@
 
 This DR establish what should be range of upper and lower bounds for KWSEs.
 
-Two analyses were perfomed to supplement this decision.
+Two analyses were performed to supplement this decision.
 
 ---
 
@@ -61,16 +61,16 @@ In high-gradient, normal-depth-controlled reaches, extensive downstream conditio
 ### ALT-A - Same as D/S Reach Max and Min STL WSEL Floored by Reach's Normal Depth WSEL at STL
 #current
 
-For every reach's every discharge we model it with full range of D/S Reach U/S WSEL range, but we don't model any KWSE that is lower than the Reach's 
+For every reach's every discharge we model it with full range of D/S Reach U/S WSEL range, but we don't model any KWSE that is lower than the reach's normal depth WSEL at the STL.
 
-Straightforward to implement, test, and explain. . Eliminates the risk of omitting a physically important combination due to a flawed sampling model.
+Straightforward to implement, test, and explain. Eliminates the risk of omitting a physically important combination due to a flawed sampling model.
 
 ### ALT-B - Joint Probability Sampling
 Model the joint recurrence-interval distribution of upstream discharge and downstream stage. Sample more densely in high-probability regions and sparsely in low-probability regions. For large rivers with strongly correlated adjacent reaches, this would substantially reduce run count or concentrate fidelity in physically likely conditions. However, constructing a reliable joint distribution at CONUS scale introduces significant complexity and additional failure modes. A brute-force cross-product is preferred for now.
 
 ### ALT-C - Suppress Downstream Variation Where Backwater is Negligible
 
-This belongs in DR-001
+*This belongs in DR-001*
 
 Identify reaches where upstream water surface elevation is insensitive to downstream stage at a given discharge (i.e., normal-depth-controlled or near-critical flow). For those reaches, simulate only a single downstream condition per discharge. This could reduce library size substantially for high-gradient reaches. Identification could use static reach attributes (slope, Froude estimates) or response curves from an initial set of runs. Analysis of Ripple1D rating curve data confirms that this behavior exists and is reach-dependent, but the identification logic adds complexity. Defaulting to ALT-A; this alternative remains viable if targeted cost reduction is required.
 

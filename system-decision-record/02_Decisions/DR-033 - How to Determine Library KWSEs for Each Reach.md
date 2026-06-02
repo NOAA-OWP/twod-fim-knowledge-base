@@ -1,5 +1,5 @@
 ## Description
-Per [[DR-031 - Should Downstream Stage be Uniform or Cell-Specific Along the STL]], downstream boundary conditions are drawn from completed downstream reach simulations. Per [[DR-032 - What Should be the Lower and Upper KWSE Bound for Each Reach for Each Discharge]] we will have a range of for d/s KWSE to work with, but within that range multiple simulations will exist producing many KWSEs. Each such simulation is attributed a nominal water surface elevation. 
+Per [[DR-031 - Should Downstream Stage be Uniform or Cell-Specific Along the STL]], downstream boundary conditions are drawn from completed downstream reach simulations. Per [[DR-032 - What Should be the Lower and Upper KWSE Bound for Each Reach for Each Discharge]] we will have a range for d/s KWSE to work with, but within that range multiple simulations will exist producing many KWSEs. Each such simulation is attributed a nominal water surface elevation. 
 
 This decision addresses how to select the library values of downstream KWSEs to use as KWSE set for the current reach, so that the resulting library spans a useful range of downstream conditions without a large number of runs.
 
@@ -14,8 +14,17 @@ ds_interval = len(ds_scenarios) // ds_resolution
 ds_space = ds_scenarios[::ds_interval]
 ```
 
-### ALT-B - Delta Value Rounded to Nearest Value
+### ALT-B - Snap to a Per-Reach Standard Stage Grid
 #current
+
+Each reach picks a stage increment `Δz` from the discrete menu `{0.25, 0.5, 1, 2}` m. The library grid for that reach is built by stepping up from the per-discharge lower bound (from [[DR-032 - What Should be the Lower and Upper KWSE Bound for Each Reach for Each Discharge]]) rounded up to nearest `Δz` in increments of `Δz`, until the upper bound.
+
+Examples for d/s WSEL range `224 → 227.1`:
+- `Δz = 0.25` → `224, 224.25, 224.5, …, 226.5, 226.75, 227`
+- `Δz = 1` → `224, 225, 226, 227`
+- `Δz = 2` → `224, 226, 228`
+
+Each grid stage is bound to the downstream simulation whose nominal stage is nearest, provided it is within `Δz/2`; that run's WSE raster is imposed on the STL (see [[DR-031 - Should Downstream Stage be Uniform or Cell-Specific Along the STL]]). Targets with no downstream run inside `Δz/2` are skipped as gaps in the downstream reach's own sampling.
 
 ### ALT-C - Reach-Adaptive Delta Elevation Based on Stream Order or Drainage Area
 
