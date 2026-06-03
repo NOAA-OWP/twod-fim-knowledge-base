@@ -29,11 +29,11 @@ We want to establish our Qs by walking the reach's actual response curve, so tha
 
 The actual threshold for these values will be configurable per reach.
 
-| Criterion    | Quantity                                           | Target Δ | Acceptance band  |
-| ------------ | -------------------------------------------------- | -------- | ---------------- |
-| max stage    | max stage at monitor points                        | +1.0 m   | +0.75 to +1.25 m |
-| median stage | median stage at monitor points                     | +0.5 m   | +0.25 to +0.75 m |
-| extent       | cells flooded in comparison to last accepted step* | +10 %    | +7.5 to +12.5 %  |
+| Criterion | Quantity | Target Δ | Acceptance band |
+| --- | --- | --- | --- |
+| max stage | max stage at monitor points | +1.0 m | +0.75 to +1.25 m |
+| median stage | median stage at monitor points | +0.5 m | +0.25 to +0.75 m |
+| extent | cells flooded in comparison to last accepted step* | +10 % | +7.5 to +12.5 % |
 
 _* video has this incorrect_
 
