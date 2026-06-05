@@ -1,0 +1,943 @@
+<mxfile host="65bd71144e">
+    <diagram name="A-full-chain" id="seq-a-full-chain">
+        <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="A-title" value="A. Full chain (rows 2, 7) — model invalidated, rebuild everything" style="text;html=1;fontStyle=1;fontSize=16;align=left;verticalAlign=middle;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="10" width="700" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-op" value="Operator" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="73" y="60" width="30" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-db" value="&lt;b&gt;DB&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="50" width="150" height="1700" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-orch" value="&lt;b&gt;Orchestrator&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="50" width="150" height="1700" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-bm" value="&lt;b&gt;build_model&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="50" width="150" height="1700" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-s3" value="&lt;b&gt;S3&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="930" y="50" width="150" height="1700" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-nd" value="&lt;b&gt;run_nd_scenarios&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="50" width="150" height="1700" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-ps" value="&lt;b&gt;plan_scenarios&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1430" y="50" width="150" height="1700" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-kwse" value="&lt;b&gt;run_kwse_scenarios&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1680" y="50" width="150" height="1700" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-m1" value="update desired_state (override_id or hydrofabric) + bump revision" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="88" y="154" as="sourcePoint"/>
+                        <mxPoint x="255" y="154" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-n1" value="sensor tick" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;size=12;align=center;fontSize=11;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="440" y="170" width="130" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-m3" value="query gap (applied_revision &lt; revision)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="230" as="sourcePoint"/>
+                        <mxPoint x="255" y="230" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m4" value="reach R needs work" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="255" y="278" as="sourcePoint"/>
+                        <mxPoint x="505" y="278" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m5" value="set current_state.processing = TRUE" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="326" as="sourcePoint"/>
+                        <mxPoint x="255" y="326" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m6" value="submit job (reach R)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="374" as="sourcePoint"/>
+                        <mxPoint x="755" y="374" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m7" value="write model artifacts" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="755" y="422" as="sourcePoint"/>
+                        <mxPoint x="1005" y="422" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m8" value="write manifest.json" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="755" y="470" as="sourcePoint"/>
+                        <mxPoint x="1005" y="470" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m9" value="done" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="755" y="518" as="sourcePoint"/>
+                        <mxPoint x="505" y="518" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m10" value="verify manifest.json exists" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="566" as="sourcePoint"/>
+                        <mxPoint x="1005" y="566" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m11" value="update current_state (model_hash, model_identity_hash, domain_hash)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="614" as="sourcePoint"/>
+                        <mxPoint x="255" y="614" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m12" value="submit job (reach R, q range)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="662" as="sourcePoint"/>
+                        <mxPoint x="1255" y="662" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m13" value="write depth.tif" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1255" y="710" as="sourcePoint"/>
+                        <mxPoint x="1005" y="710" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m14" value="write run.json (PUT LAST)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1255" y="758" as="sourcePoint"/>
+                        <mxPoint x="1005" y="758" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m15" value="done" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1255" y="806" as="sourcePoint"/>
+                        <mxPoint x="505" y="806" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m16" value="verify run.json exists" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="854" as="sourcePoint"/>
+                        <mxPoint x="1005" y="854" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m17" value="update current_state (q_set)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="902" as="sourcePoint"/>
+                        <mxPoint x="255" y="902" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m18" value="record run in runs table" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="950" as="sourcePoint"/>
+                        <mxPoint x="255" y="950" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m19" value="plan KWSE sweep (in-process)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="998" as="sourcePoint"/>
+                        <mxPoint x="1505" y="998" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m20" value="list ND results" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1505" y="1046" as="sourcePoint"/>
+                        <mxPoint x="1005" y="1046" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m21" value="ScenarioSet" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1505" y="1094" as="sourcePoint"/>
+                        <mxPoint x="505" y="1094" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m22" value="submit job (reach R, scenarios)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1142" as="sourcePoint"/>
+                        <mxPoint x="1755" y="1142" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m23" value="write depth.tif" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1755" y="1190" as="sourcePoint"/>
+                        <mxPoint x="1005" y="1190" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m24" value="write run.json (PUT LAST)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1755" y="1238" as="sourcePoint"/>
+                        <mxPoint x="1005" y="1238" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m25" value="done" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1755" y="1286" as="sourcePoint"/>
+                        <mxPoint x="505" y="1286" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m26" value="verify run.json exists" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1334" as="sourcePoint"/>
+                        <mxPoint x="1005" y="1334" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m27" value="update current_state (ds_min_kwse, ds_max_kwse)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1382" as="sourcePoint"/>
+                        <mxPoint x="255" y="1382" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m28" value="record run in runs table" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1430" as="sourcePoint"/>
+                        <mxPoint x="255" y="1430" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m29" value="set applied_revision = revision, processing = FALSE" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1478" as="sourcePoint"/>
+                        <mxPoint x="255" y="1478" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m30" value="query reach_network (upstream of R)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1526" as="sourcePoint"/>
+                        <mxPoint x="255" y="1526" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-m31" value="check runs.transfer_bc_from_run_hash" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1574" as="sourcePoint"/>
+                        <mxPoint x="255" y="1574" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="A-n2" value="cascade upstream if needed (see diagram D)" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;size=12;align=center;fontSize=11;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="1600" width="260" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-footer-db" value="DB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="1750" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-footer-orch" value="Orchestrator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="1750" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-footer-bm" value="build_model" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="1750" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-footer-s3" value="S3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="930" y="1750" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-footer-nd" value="run_nd_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="1750" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-footer-ps" value="plan_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1430" y="1750" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="A-footer-kwse" value="run_kwse_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1680" y="1750" width="150" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram name="B-new-nd-runs" id="seq-b-new-nd">
+        <mxGraphModel dx="2074" dy="1157" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1600" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="B-title" value="B. New ND runs (rows 3, 4, 5) — model unchanged, re-run from ND" style="text;html=1;fontStyle=1;fontSize=16;align=left;verticalAlign=middle;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="10" width="700" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-op" value="Operator" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="73" y="60" width="30" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-db" value="DB" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="50" width="150" height="1350" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-orch" value="Orchestrator" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="50" width="150" height="1350" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-s3" value="S3" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="50" width="150" height="1350" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-nd" value="run_nd_scenarios" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="930" y="50" width="150" height="1350" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-ps" value="plan_scenarios" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="50" width="150" height="1350" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-kwse" value="run_kwse_scenarios" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1430" y="50" width="150" height="1350" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-m1" value="update desired_state (q_set, solver, or library_density) + bump revision" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="88" y="153" as="sourcePoint"/>
+                        <mxPoint x="255" y="153" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-n1" value="sensor tick" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;size=12;align=center;fontSize=11;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="440" y="170" width="130" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-m3" value="query gap (applied_revision &lt; revision)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="230" as="sourcePoint"/>
+                        <mxPoint x="255" y="230" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m4" value="reach R needs work" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="255" y="278" as="sourcePoint"/>
+                        <mxPoint x="505" y="278" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m5" value="set current_state.processing = TRUE" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="326" as="sourcePoint"/>
+                        <mxPoint x="255" y="326" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m6" value="submit job (reach R, q range)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="374" as="sourcePoint"/>
+                        <mxPoint x="1005" y="374" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m7" value="write depth.tif" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1005" y="422" as="sourcePoint"/>
+                        <mxPoint x="755" y="422" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m8" value="write run.json (PUT LAST)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1005" y="470" as="sourcePoint"/>
+                        <mxPoint x="755" y="470" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m9" value="done" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1005" y="518" as="sourcePoint"/>
+                        <mxPoint x="505" y="518" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m10" value="verify run.json exists" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="566" as="sourcePoint"/>
+                        <mxPoint x="755" y="566" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m11" value="update current_state (q_set)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="614" as="sourcePoint"/>
+                        <mxPoint x="255" y="614" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m12" value="record run in runs table" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="662" as="sourcePoint"/>
+                        <mxPoint x="255" y="662" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m13" value="plan KWSE sweep (in-process)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="710" as="sourcePoint"/>
+                        <mxPoint x="1255" y="710" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m14" value="list ND results" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1255" y="758" as="sourcePoint"/>
+                        <mxPoint x="755" y="758" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m15" value="ScenarioSet" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1255" y="806" as="sourcePoint"/>
+                        <mxPoint x="505" y="806" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m16" value="submit job (reach R, scenarios)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="854" as="sourcePoint"/>
+                        <mxPoint x="1505" y="854" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m17" value="write depth.tif" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1505" y="902" as="sourcePoint"/>
+                        <mxPoint x="755" y="902" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m18" value="write run.json (PUT LAST)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1505" y="950" as="sourcePoint"/>
+                        <mxPoint x="755" y="950" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m19" value="done" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1505" y="998" as="sourcePoint"/>
+                        <mxPoint x="505" y="998" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m20" value="verify run.json exists" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1046" as="sourcePoint"/>
+                        <mxPoint x="755" y="1046" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m21" value="update current_state (ds_min_kwse, ds_max_kwse)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1094" as="sourcePoint"/>
+                        <mxPoint x="255" y="1094" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m22" value="record run in runs table" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1142" as="sourcePoint"/>
+                        <mxPoint x="255" y="1142" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m23" value="set applied_revision = revision, processing = FALSE" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1190" as="sourcePoint"/>
+                        <mxPoint x="255" y="1190" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m24" value="query reach_network (upstream of R)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1238" as="sourcePoint"/>
+                        <mxPoint x="255" y="1238" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-m25" value="check runs.transfer_bc_from_run_hash" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1286" as="sourcePoint"/>
+                        <mxPoint x="255" y="1286" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="B-n2" value="cascade upstream if needed (see diagram D)" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;size=12;align=center;fontSize=11;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="1310" width="260" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-footer-db" value="DB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="1400" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-footer-orch" value="Orchestrator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="1400" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-footer-s3" value="S3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="1400" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-footer-nd" value="run_nd_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="930" y="1400" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-footer-ps" value="plan_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="1400" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="B-footer-kwse" value="run_kwse_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1430" y="1400" width="150" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram name="C-domain-dem-change" id="seq-c-domain-dem">
+        <mxGraphModel dx="2074" dy="1157" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="C-title" value="C. Domain / DEM change (rows 6, 8) — always rebuild, skip ND if exist" style="text;html=1;fontStyle=1;fontSize=16;align=left;verticalAlign=middle;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="10" width="700" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-op" value="Operator" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="73" y="60" width="30" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-db" value="DB" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="50" width="150" height="1800" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-orch" value="Orchestrator" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="50" width="150" height="1800" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-bm" value="build_model" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="50" width="150" height="1800" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-s3" value="S3" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="930" y="50" width="150" height="1800" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-nd" value="run_nd_scenarios" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="50" width="150" height="1800" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-ps" value="plan_scenarios" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1430" y="50" width="150" height="1800" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-kwse" value="run_kwse_scenarios" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1680" y="50" width="150" height="1800" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-m1" value="update desired_state (domain or DEM) + bump revision" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="88" y="153" as="sourcePoint"/>
+                        <mxPoint x="255" y="153" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-n1" value="sensor tick" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;size=12;align=center;fontSize=11;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="440" y="170" width="130" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-m3" value="query gap (applied_revision &lt; revision)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="230" as="sourcePoint"/>
+                        <mxPoint x="255" y="230" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m4" value="reach R needs work" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="255" y="278" as="sourcePoint"/>
+                        <mxPoint x="505" y="278" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m5" value="set current_state.processing = TRUE" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="326" as="sourcePoint"/>
+                        <mxPoint x="255" y="326" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m6" value="submit job (reach R)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="374" as="sourcePoint"/>
+                        <mxPoint x="755" y="374" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m7" value="write model artifacts" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="755" y="422" as="sourcePoint"/>
+                        <mxPoint x="1005" y="422" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m8" value="write manifest.json" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="755" y="470" as="sourcePoint"/>
+                        <mxPoint x="1005" y="470" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m9" value="done" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="755" y="518" as="sourcePoint"/>
+                        <mxPoint x="505" y="518" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m10" value="verify manifest.json exists" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="566" as="sourcePoint"/>
+                        <mxPoint x="1005" y="566" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m11" value="update current_state (model_hash, model_identity_hash, domain_hash)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="614" as="sourcePoint"/>
+                        <mxPoint x="255" y="614" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m12" value="check for existing ND runs at new model path" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="662" as="sourcePoint"/>
+                        <mxPoint x="1005" y="662" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-alt" value="[alt] ND runs don&#39;t exist" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;dashed=1;opacity=50;verticalAlign=top;fontStyle=1;fontSize=11;align=left;spacingLeft=8;spacingTop=4;strokeWidth=2;fillStyle=auto;glass=1;shadow=1;" parent="1" vertex="1">
+                    <mxGeometry x="231" y="690" width="1043" height="390" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-m13" value="submit job (reach R, q range)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="730" as="sourcePoint"/>
+                        <mxPoint x="1255" y="730" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m14" value="write depth.tif" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1255" y="778" as="sourcePoint"/>
+                        <mxPoint x="1005" y="778" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m15" value="write run.json (PUT LAST)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1255" y="826" as="sourcePoint"/>
+                        <mxPoint x="1005" y="826" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m16" value="done" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1255" y="874" as="sourcePoint"/>
+                        <mxPoint x="505" y="874" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m17" value="verify run.json exists" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="960" as="sourcePoint"/>
+                        <mxPoint x="1005" y="960" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m18" value="update current_state (q_set)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1008" as="sourcePoint"/>
+                        <mxPoint x="255" y="1008" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m19" value="record run in runs table" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1056" as="sourcePoint"/>
+                        <mxPoint x="255" y="1056" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m20" value="plan KWSE sweep (in-process)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1104" as="sourcePoint"/>
+                        <mxPoint x="1505" y="1104" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m21" value="list ND results" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1505" y="1152" as="sourcePoint"/>
+                        <mxPoint x="1005" y="1152" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m22" value="ScenarioSet" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1505" y="1200" as="sourcePoint"/>
+                        <mxPoint x="505" y="1200" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m23" value="submit job (reach R, scenarios)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1248" as="sourcePoint"/>
+                        <mxPoint x="1755" y="1248" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m24" value="write depth.tif" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1755" y="1296" as="sourcePoint"/>
+                        <mxPoint x="1005" y="1296" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m25" value="write run.json (PUT LAST)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1755" y="1344" as="sourcePoint"/>
+                        <mxPoint x="1005" y="1344" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m26" value="done" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1755" y="1392" as="sourcePoint"/>
+                        <mxPoint x="505" y="1392" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m27" value="verify run.json exists" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1440" as="sourcePoint"/>
+                        <mxPoint x="1005" y="1440" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m28" value="update current_state (ds_min_kwse, ds_max_kwse)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1488" as="sourcePoint"/>
+                        <mxPoint x="255" y="1488" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m29" value="record run in runs table" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1536" as="sourcePoint"/>
+                        <mxPoint x="255" y="1536" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m30" value="set applied_revision = revision, processing = FALSE" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1584" as="sourcePoint"/>
+                        <mxPoint x="255" y="1584" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m31" value="query reach_network (upstream of R)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1632" as="sourcePoint"/>
+                        <mxPoint x="255" y="1632" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-m32" value="check runs.transfer_bc_from_run_hash" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="505" y="1680" as="sourcePoint"/>
+                        <mxPoint x="255" y="1680" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="C-n2" value="cascade upstream if needed (see diagram D)" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;size=12;align=center;fontSize=11;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="1710" width="260" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-footer-db" value="DB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="1850" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-footer-orch" value="Orchestrator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="1850" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-footer-bm" value="build_model" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="1850" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-footer-s3" value="S3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="930" y="1850" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-footer-nd" value="run_nd_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="1850" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-footer-ps" value="plan_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1430" y="1850" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="C-footer-kwse" value="run_kwse_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1680" y="1850" width="150" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram name="D-upstream-cascade" id="seq-d-upstream">
+        <mxGraphModel dx="2074" dy="1157" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="2000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="D-title" value="D. Upstream cascade (row 9) — revision NOT bumped for upstream reaches" style="text;html=1;fontStyle=1;fontSize=16;align=left;verticalAlign=middle;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="10" width="700" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-db" value="DB" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="50" width="150" height="1750" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-orch" value="Orchestrator" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="50" width="150" height="1750" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-bm" value="build_model" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="50" width="150" height="1750" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-s3" value="S3" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="820" y="50" width="150" height="1750" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-nd" value="run_nd_scenarios" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1070" y="50" width="150" height="1750" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-ps" value="plan_scenarios" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1320" y="50" width="150" height="1750" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-kwse" value="run_kwse_scenarios" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;size=30;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1570" y="50" width="150" height="1750" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-n0" value="reach R just completed" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;size=12;align=center;fontSize=11;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="110" width="130" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-m1" value="query reach_network (upstream neighbors of R)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="170" as="sourcePoint"/>
+                        <mxPoint x="145" y="170" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m2" value="check runs.transfer_bc_from_run_hash for each candidate" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="218" as="sourcePoint"/>
+                        <mxPoint x="145" y="218" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m3" value="affected upstream reaches (U1, U2, ...)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="145" y="266" as="sourcePoint"/>
+                        <mxPoint x="395" y="266" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-loop" value="[loop] for each affected upstream reach U" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;dashed=1;opacity=50;verticalAlign=top;fontStyle=1;fontSize=11;align=left;spacingLeft=8;spacingTop=4;strokeWidth=2;fillStyle=auto;glass=1;shadow=1;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="290" width="1720" height="1460" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-m4" value="set current_state.processing = TRUE (reach U)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="330" as="sourcePoint"/>
+                        <mxPoint x="145" y="330" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m5" value="check model exists at expected path for U" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="378" as="sourcePoint"/>
+                        <mxPoint x="895" y="378" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-alt1" value="[alt] model doesn&#39;t exist" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#FCE4EC,#1A1A1A);strokeColor=light-dark(#FCE4EC,#EDEDED);dashed=1;opacity=50;verticalAlign=top;fontStyle=1;fontSize=11;align=left;spacingLeft=8;spacingTop=4;strokeWidth=2;fillStyle=auto;glass=1;shadow=1;" parent="1" vertex="1">
+                    <mxGeometry x="110" y="400" width="810" height="330" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-m6" value="submit job (reach U)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="440" as="sourcePoint"/>
+                        <mxPoint x="645" y="440" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m7" value="write model artifacts" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="645" y="488" as="sourcePoint"/>
+                        <mxPoint x="895" y="488" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m8" value="write manifest.json" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="645" y="536" as="sourcePoint"/>
+                        <mxPoint x="895" y="536" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m9" value="done" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="645" y="584" as="sourcePoint"/>
+                        <mxPoint x="395" y="584" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m10" value="verify manifest.json exists" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="660" as="sourcePoint"/>
+                        <mxPoint x="895" y="660" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m11" value="update current_state (model_hash, model_identity_hash, domain_hash)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="708" as="sourcePoint"/>
+                        <mxPoint x="145" y="708" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m12" value="check for existing ND runs at model path for U" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="756" as="sourcePoint"/>
+                        <mxPoint x="895" y="756" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-alt2" value="[alt] ND runs don&#39;t exist" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#7a9ec9;dashed=1;opacity=50;verticalAlign=top;fontStyle=1;fontSize=11;align=left;spacingLeft=8;spacingTop=4;strokeWidth=2;fillStyle=auto;glass=1;shadow=1;" parent="1" vertex="1">
+                    <mxGeometry x="110" y="778" width="1060" height="380" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-m13" value="submit job (reach U, q range)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="818" as="sourcePoint"/>
+                        <mxPoint x="1145" y="818" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m14" value="write depth.tif" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1145" y="866" as="sourcePoint"/>
+                        <mxPoint x="895" y="866" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m15" value="write run.json (PUT LAST)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1145" y="914" as="sourcePoint"/>
+                        <mxPoint x="895" y="914" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m16" value="done" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1145" y="962" as="sourcePoint"/>
+                        <mxPoint x="395" y="962" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m17" value="verify run.json exists" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="1040" as="sourcePoint"/>
+                        <mxPoint x="895" y="1040" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m18" value="update current_state (q_set)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="1088" as="sourcePoint"/>
+                        <mxPoint x="145" y="1088" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m19" value="record run in runs table" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="1136" as="sourcePoint"/>
+                        <mxPoint x="145" y="1136" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m20" value="plan KWSE sweep (in-process)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="1184" as="sourcePoint"/>
+                        <mxPoint x="1395" y="1184" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m21" value="list ND results" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1395" y="1232" as="sourcePoint"/>
+                        <mxPoint x="895" y="1232" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m22" value="ScenarioSet" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1395" y="1280" as="sourcePoint"/>
+                        <mxPoint x="395" y="1280" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m23" value="submit job (reach U, scenarios)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="1328" as="sourcePoint"/>
+                        <mxPoint x="1645" y="1328" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m24" value="write depth.tif" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1645" y="1376" as="sourcePoint"/>
+                        <mxPoint x="895" y="1376" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m25" value="write run.json (PUT LAST)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1645" y="1424" as="sourcePoint"/>
+                        <mxPoint x="895" y="1424" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m26" value="done" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;dashed=1;dashPattern=2 3;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="1645" y="1472" as="sourcePoint"/>
+                        <mxPoint x="395" y="1472" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m27" value="verify run.json exists" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="1520" as="sourcePoint"/>
+                        <mxPoint x="895" y="1520" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m28" value="update current_state (ds_min_kwse, ds_max_kwse)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="1568" as="sourcePoint"/>
+                        <mxPoint x="145" y="1568" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m29" value="record run in runs table" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="1616" as="sourcePoint"/>
+                        <mxPoint x="145" y="1616" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-m30" value="set current_state.processing = FALSE (reach U)" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="395" y="1664" as="sourcePoint"/>
+                        <mxPoint x="145" y="1664" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="D-n1" value="same cascade logic applies to U&#39;s upstream neighbors" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;size=12;align=center;fontSize=11;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="1700" width="300" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-footer-db" value="DB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="1800" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-footer-orch" value="Orchestrator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="1800" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-footer-bm" value="build_model" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="1800" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-footer-s3" value="S3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="820" y="1800" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-footer-nd" value="run_nd_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1070" y="1800" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-footer-ps" value="plan_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1320" y="1800" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="D-footer-kwse" value="run_kwse_scenarios" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1570" y="1800" width="150" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

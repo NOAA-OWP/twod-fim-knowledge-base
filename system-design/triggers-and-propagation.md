@@ -45,6 +45,8 @@ Not revision bumps. Follow-on work after a reach finishes processing (see §2.1 
 
 ### 1.3 Trigger flows
 
+Sequence diagram versions showing component interactions in [`trigger-sequence-diagrams.md`](trigger-sequence-diagrams.md) ([drawio](trigger-sequence-diagrams.drawio)).
+
 **A. Full chain (rows 2, 7)** — model invalidated, rebuild everything.
 
 ```mermaid
