@@ -7,7 +7,7 @@ S3 path conventions and identity/realization separation in [`guide.md`](guide.md
 ```mermaid
 flowchart TD
     Gap["gap detected for reach R"] --> Build["build_model (tooling)"]
-    Build --> UpBuild["verify S3 → update current_state<br/>(model exists, model_hash)"]
+    Build --> UpBuild["verify S3 → update current_state<br/>(model exists, model_id)"]
     UpBuild --> ND["run_nd_scenarios (tooling)<br/>orchestrator passes q range"]
     ND --> UpND["verify S3 → update current_state<br/>(q_set, run records)"]
     UpND --> Plan["plan_scenarios<br/>KWSE sweep from ND results"]
@@ -94,9 +94,9 @@ What the system has actually achieved. All columns NOT NULL — holds effective 
 ```sql
 CREATE TABLE current_state (
     reach_id            INTEGER PRIMARY KEY REFERENCES reach_network(reach_id),
-    model_hash          TEXT NOT NULL,
-    model_identity_hash TEXT NOT NULL,
-    domain_hash         TEXT NOT NULL,
+    model_id          TEXT NOT NULL,
+    identity_hash TEXT NOT NULL,
+    domain_code         TEXT NOT NULL,
     processing          BOOLEAN NOT NULL DEFAULT FALSE,
     q_set               TEXT NOT NULL,    -- JSON array of completed Q values
     ds_min_kwse         REAL NOT NULL,
@@ -115,8 +115,8 @@ Append-only ledger of every run. `transfer_bc_from_*` columns for propagation di
 CREATE TABLE runs (
     reach_id                  INTEGER NOT NULL REFERENCES reach_network(reach_id),
     run_identity_hash         TEXT NOT NULL,
-    model_hash                TEXT NOT NULL,
-    model_identity_hash       TEXT NOT NULL,
+    model_id                TEXT NOT NULL,
+    identity_hash       TEXT NOT NULL,
     run_type                  TEXT NOT NULL CHECK (run_type IN ('nd', 'kwse')),
     q_cms                     REAL NOT NULL,
     bc_type                   TEXT NOT NULL,
@@ -129,7 +129,7 @@ CREATE TABLE runs (
     hotstart_from_run_hash    TEXT,
     transfer_bc_from_reach_id INTEGER,
     transfer_bc_from_run_hash TEXT,
-    PRIMARY KEY (reach_id, model_identity_hash, run_identity_hash, q_cms, kwse_m)
+    PRIMARY KEY (reach_id, identity_hash, run_identity_hash, q_cms, kwse_m)
 );
 ```
 

@@ -501,7 +501,7 @@
             <mxRectangle height="30" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ZAqS73WfYUx7DGupOHKJ-5" parent="ZAqS73WfYUx7DGupOHKJ-3" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="model_hash" vertex="1">
+        <mxCell id="ZAqS73WfYUx7DGupOHKJ-5" parent="ZAqS73WfYUx7DGupOHKJ-3" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="model_id" vertex="1">
           <mxGeometry height="30" width="180" x="30" as="geometry">
             <mxRectangle height="30" width="180" as="alternateBounds" />
           </mxGeometry>
@@ -514,7 +514,7 @@
             <mxRectangle height="30" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="BktT0fnpddjEpD7gs-kr-163" parent="BktT0fnpddjEpD7gs-kr-161" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="model_identity_hash" vertex="1">
+        <mxCell id="BktT0fnpddjEpD7gs-kr-163" parent="BktT0fnpddjEpD7gs-kr-161" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="identity_hash" vertex="1">
           <mxGeometry height="30" width="180" x="30" as="geometry">
             <mxRectangle height="30" width="180" as="alternateBounds" />
           </mxGeometry>
@@ -527,7 +527,7 @@
             <mxRectangle height="30" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ZAqS73WfYUx7DGupOHKJ-2" parent="ZAqS73WfYUx7DGupOHKJ-0" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="domain_hash" vertex="1">
+        <mxCell id="ZAqS73WfYUx7DGupOHKJ-2" parent="ZAqS73WfYUx7DGupOHKJ-0" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="domain_code" vertex="1">
           <mxGeometry height="30" width="180" x="30" as="geometry">
             <mxRectangle height="30" width="180" as="alternateBounds" />
           </mxGeometry>
@@ -636,7 +636,7 @@
             <mxRectangle height="30" width="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="BktT0fnpddjEpD7gs-kr-215" parent="BktT0fnpddjEpD7gs-kr-213" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="model_hash" vertex="1">
+        <mxCell id="BktT0fnpddjEpD7gs-kr-215" parent="BktT0fnpddjEpD7gs-kr-213" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;whiteSpace=wrap;html=1;" value="model_id" vertex="1">
           <mxGeometry height="30" width="200" x="30" as="geometry">
             <mxRectangle height="30" width="200" as="alternateBounds" />
           </mxGeometry>
@@ -851,7 +851,7 @@
         <mxCell id="6purj3aTy7wOQZToESxH-10" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;size=12;align=center;fontSize=11;" value="build is missing → build first (once)" vertex="1">
           <mxGeometry height="40" width="120" x="300" y="482" as="geometry" />
         </mxCell>
-        <mxCell id="6purj3aTy7wOQZToESxH-11" edge="1" parent="1" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;" value="PUT model to S3 models/reach=12345/hash(model_identity)+domain_geohash/manifest.json + rasters + vectors + metadata">
+        <mxCell id="6purj3aTy7wOQZToESxH-11" edge="1" parent="1" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;" value="PUT model to S3 models/reach=12345/identity_hash+domain_code/model.json + rasters + vectors + metadata">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="885" y="670" as="sourcePoint" />
             <mxPoint x="1410" y="670" as="targetPoint" />
@@ -910,7 +910,7 @@
             <mxPoint x="705" y="708" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="6purj3aTy7wOQZToESxH-20" edge="1" parent="1" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;entryX=0.506;entryY=0.64;entryDx=0;entryDy=0;entryPerimeter=0;" value="PUT results and run.json to S3&lt;br&gt;results/reach=12345/hash(model_identity)/hash(run_identity)/z=nd/f=200/depth.tif + run.json + metadata">
+        <mxCell id="6purj3aTy7wOQZToESxH-20" edge="1" parent="1" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;entryX=0.506;entryY=0.64;entryDx=0;entryDy=0;entryPerimeter=0;" value="PUT results and run.json to S3&lt;br&gt;results/reach=12345/identity_hash/run_identity_hash/z=nd/f=200/depth.tif + run.json + metadata">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1060" y="960" as="sourcePoint" />
             <mxPoint x="1410.8999999999996" y="960.8" as="targetPoint" />
@@ -934,7 +934,7 @@
             <mxPoint x="1059.05" y="1052" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="6purj3aTy7wOQZToESxH-25" edge="1" parent="1" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fillColor=#ffe6cc;strokeColor=#d79b00;entryX=0.506;entryY=0.64;entryDx=0;entryDy=0;entryPerimeter=0;" value="PUT results and run.json to S3&lt;br&gt;results/reach=12345/hash(model_identity)/hash(run_identity)/z=283/f=200/depth.tif + run.json + metadata + STL">
+        <mxCell id="6purj3aTy7wOQZToESxH-25" edge="1" parent="1" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fillColor=#ffe6cc;strokeColor=#d79b00;entryX=0.506;entryY=0.64;entryDx=0;entryDy=0;entryPerimeter=0;" value="PUT results and run.json to S3&lt;br&gt;results/reach=12345/identity_hash/run_identity_hash/z=283/f=200/depth.tif + run.json + metadata + STL">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1240" y="1357" as="sourcePoint" />
             <mxPoint x="1411.4499999999996" y="1357.8" as="targetPoint" />

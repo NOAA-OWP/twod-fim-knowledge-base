@@ -29,10 +29,10 @@
 ## Key Design Decisions
 
 - STL is not part of model definition, but STL will inform model_domain desired state
-- Model = model_identity (reach + methodology + overrides) + realization (domain)
+- Model = identity (reach + sources + grid/CRS + params + `build_model` version) + realization (domain)
 - Run = run_identity (engine + engine version) + realization (scenario: q, kwse)
 - Identity and realization are always separate component in hashes and separate DB columns so that group / roll back / delete by either is possible
-- Runs with same model_identity stay valid even if a domain change updates the model hash
+- Runs with same identity_hash stay valid even if a domain change updates the model_id
 - The database has three main tables
 - Desired state = input to system = authored intent
 - Current state = what's actually been achieved = current state of the system
@@ -58,18 +58,22 @@ This is conceptual model of different objects in modeling, this is not a working
 - is_headwater ??
 - geom
 
-### Model (id: model_identity_hash+domain_tag)
-- model_identity_hash
-- domain_tag ??
+### Model (id: model_id = identity_hash+domain_code)
+- identity_hash
+- domain_code (grid-snapped N/S/E/W offsets from the reach anchor, in CRS units)
 - domain bbox geom
 
-#### Model Identity (id: hash of content)
-- override_id
-- `build_model` job version
-- dem_source (unique hash of source of date. ex usgs url + version)
-- roughness_source (unique hash of source of date. ex nld url + version)
-- reach_id
-- reach_geom
+#### Identity (identity_hash = hash of this content)
+
+Overrides are applied upstream and arrive folded into reach_geom / sources / params below; the `build_model` job itself doesn't take an override_id.
+
+- sdr_commit (methodology version pin)
+- reach_geom_hash
+- dem_source_inputs_hash (ex usgs url + version)
+- roughness_source_inputs_hash (ex nlcd url + version)
+- lulc_lookup_dict_hash
+- grid_resolution
+- epsg_code
 
 ### Run (id: )
 - scenario
@@ -90,9 +94,9 @@ This is conceptual model of different objects in modeling, this is not a working
 ## Storage Layout
 
 Schemas:
-model.manifest.json (where do you want to store metadata about your artifacts..)
+model.json (model definition + artifact inventory; see build_model-design.md / model.schema.json)
 metrics.parquet for qc analytics
-run.manifes.json
+run.json
 
 ```bash
 s3://twod-fim/
@@ -102,15 +106,15 @@ s3://twod-fim/
     │
     ├── models/                             one physical build = one DEM clip
     │   └── reach=12345/
-    │       └── <hash(model_identity)+<domain_geohash>/             # identity — group/rollback by this
-    │              ├── manifest.json           input + output
+    │       └── model_id/   (= identity_hash+domain_code)   # group/rollback by identity_hash
+    │              ├── model.json              input + output (written last)
     │              ├── metadata.csv / parquet  metadata on artifacts
     │              ├── {dem,roughness}.tif      derived; deletable after N days
-    │              └── {centerline,inflow,outflow,domain,stl}.geojson
+    │              └── {cl,inflow,centroid,domain}.geojson
     │
     └── results/                            
         └── reach=12345/
-            └── <hash(model_identity)>/  # runs file under identity, not under domain
+            └── <identity>/  # runs file under identity, not under domain
                 └──	<hash(run_identity)>/    # solver; group/rollback by this
                     └── z=283/f=200/      or .../z=nd/f=200/   # run realization: scenario point
                     	├── depth.tif           COG, EPSG:5070; also the hot-start seed
