@@ -1,5 +1,5 @@
 ## Description
-Define which boundary condition should be applied along model edge cells (the domain bounding box).
+Define which boundary condition should be applied along model edge cells (the domain bounding box). This is relevant during KWSE runs.  
 
 Boundary Condition Choices Available:
 1. Close / No Boundary Condition - Water pools at the edges

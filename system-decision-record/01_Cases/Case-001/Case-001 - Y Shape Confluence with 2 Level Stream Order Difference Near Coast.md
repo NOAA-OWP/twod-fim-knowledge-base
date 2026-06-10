@@ -60,4 +60,4 @@ A combined 2D model was created for reach 3463058, 3463057, and 3463056 with dom
 ![[01_Cases/Case-001/FIG-003.png]]
 
 > [!Error] Reject
->[[DR-003 - Where and What Boundary Conditions to Apply Along the Edge Cells]] > [[DR-003 - Where and What Boundary Conditions to Apply Along the Edge Cells#ALT-A - Normal Depth at all Edges with Uniform Steep Slope|ALT-A - Normal Depth at all Edges with Uniform Steep Slope]]
+>[[DR-003 - Where and What Boundary Conditions to Apply Along the Edge Cells of a KWSE Run]] > [[DR-003 - Where and What Boundary Conditions to Apply Along the Edge Cells of a KWSE Run#ALT-A - Normal Depth at all Edges with Uniform Steep Slope|ALT-A - Normal Depth at all Edges with Uniform Steep Slope]]
