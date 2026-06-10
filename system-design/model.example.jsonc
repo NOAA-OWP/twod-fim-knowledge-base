@@ -54,15 +54,13 @@
       "href": "dem.tif",
       "checksum": "1212121212121212",
       "source_url": "https://elevation.nationalmap.gov/arcgis/services/3DEPElevation/ImageServer",
-      "retrieved": "2026-06-09T14:31:50Z",
-      "derived": true
+      "retrieved": "2026-06-09T14:31:50"
     },
     "roughness": {
       "href": "roughness.tif",
       "checksum": "3434343434343434",
       "source_url": "https://www.mrlc.gov/geoserver/NLCD_Land_Cover/wms?layer=NLCD_2021_Land_Cover_L48",
-      "retrieved": "2026-06-09T14:31:55Z",
-      "derived": true
+      "retrieved": "2026-06-09T14:31:55Z"
     },
     "centerline": {
       "href": "cl.geojson",
