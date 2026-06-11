@@ -34,7 +34,7 @@ How the orchestrator constructs worker inputs from DB state + config:
 | `base_output_path` | Constructed | `{store_root}/version=v{MAJOR}/models/reach={reach_id}/` |
 | `dem_source` | Orchestrator config | Optional — worker has default. Pass only if overriding. |
 | `roughness_source` | Orchestrator config | Optional — worker has default. Pass only if overriding. |
-| `other_geometries` | DB query | For domain expansion. |
+| `other_geometries` | — | `None` for initial implementation. Domain expansion is `expand_model` scope. |
 | All other optionals | Orchestrator config | System-wide defaults: `domain_buffer`, `grid_resolution`, `walk_us_dist_pct`, `epsg_code`, `bankfull_width_multiplier`, `lulc_lookup` |
 
 ## Processing Steps
@@ -61,6 +61,13 @@ No `runs` table entry — `build_model` produces a model, not a run.
 ## Error Handling
 
 On worker error, the orchestrator logs the error. Gap still exists — reconciliation loop retries on next tick.
+
+| Failure mode | Orchestrator action |
+|---|---|
+| Container crash / timeout | Log error. Gap persists — loop retries. |
+| Worker raises error (e.g., `DatasetUnavailableError`) | Log error + error type. Gap persists — loop retries. |
+| Verification failure (`model.json` missing after success exit) | Log as unexpected. Gap persists — loop retries. |
+| DB update failure (job succeeded but state write fails) | Log error. `model.json` exists on S3 — next retry will see it via worker idempotency check and return immediately. |
 
 ## Execution
 
