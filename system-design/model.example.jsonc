@@ -68,11 +68,6 @@
       "source_url": "s3://bucket/pre/network.parquet",
       "retrieved": "2026-06-09T14:31:40Z"
     },
-    "inflow": {
-      "href": "inflow.geojson",
-      "checksum": "9a9a9a9a9a9a9a9a",
-      "source_url": null
-    },
     "reach_centroid": {
       "href": "reach_centroid.geojson",
       "checksum": "9a9a9a9a9a9a9a9a",

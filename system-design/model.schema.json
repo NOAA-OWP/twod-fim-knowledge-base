@@ -302,7 +302,6 @@
         "terrain",
         "roughness",
         "centerline",
-        "inflow",
         "reach_centroid",
         "domain"
       ],
@@ -318,10 +317,6 @@
         "centerline": {
           "$ref": "#/$defs/asset",
           "description": "River centerline for this model's reach."
-        },
-        "inflow": {
-          "$ref": "#/$defs/asset",
-          "description": "Derived line along which water will be added to the model domain."
         },
         "reach_centroid": {
           "$ref": "#/$defs/asset",
