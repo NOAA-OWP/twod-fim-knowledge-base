@@ -40,7 +40,7 @@
 - Some desired_state fields are nullable — NULL means "use the default source", a value means it is authored. current_state always holds the effective value. This separation makes it clear that there is one place to author anything, one place place to read what's live.
 - Rollback = revert desired state; content-addressing reuses prior outputs if not yet aged out, else will be recomputed
 
-![alt text](<diagrams-system-landscape.png>)
+![alt text](/guide-diagrams/system-landscape.drawio.png)
 
 ## Versioning Model
 
@@ -125,11 +125,11 @@ s3://twod-fim/
 
 ## Repo Layout
 
-![alt text](diagrams-repos-and-ownership.png)
+![alt text](/guide-diagrams/repos-and-ownership.drawio.png)
 
 ## Basic Sequence
 
-![alt text](diagrams-run-sequence.png)
+![alt text](/guide-diagrams/run-sequence.drawio.png)
 
 ## Open Questions
 
