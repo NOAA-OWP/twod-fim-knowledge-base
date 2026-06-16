@@ -29,7 +29,7 @@
 ## Key Design Decisions
 
 - STL is not part of model definition, but STL will inform model_domain desired state
-- Model = identity (reach + sources + grid/CRS + params + `build_model` version) + realization (domain)
+- Model = identity (reach + sources + grid/CRS + params) + realization (domain). The `build_model` software version is recorded as provenance (`current_state.build_model_version`), not folded into `identity_hash`, so a software bump can drive a selective rebuild without changing the content-addressed path.
 - Run = run_identity (engine + engine version) + realization (scenario: q, kwse)
 - Identity and realization are always separate component in hashes and separate DB columns so that group / roll back / delete by either is possible
 - Runs with same identity_hash stay valid even if a domain change updates the model_id

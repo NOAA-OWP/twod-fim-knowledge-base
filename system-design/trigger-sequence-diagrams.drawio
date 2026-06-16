@@ -1,10 +1,10 @@
 <mxfile host="65bd71144e">
     <diagram name="A-full-chain" id="seq-a-full-chain">
-        <mxGraphModel dx="1693" dy="405" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
+        <mxGraphModel dx="539" dy="413" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="A-title" value="A. Full chain (rows 2, 7) — model invalidated, rebuild everything" style="text;html=1;fontStyle=1;fontSize=16;align=left;verticalAlign=middle;strokeWidth=1.5;" parent="1" vertex="1">
+                <mxCell id="A-title" value="A. Full chain (rows 2) — model invalidated, rebuild everything" style="text;html=1;fontStyle=1;fontSize=16;align=left;verticalAlign=middle;strokeWidth=1.5;" parent="1" vertex="1">
                     <mxGeometry x="70" y="10" width="700" height="24" as="geometry"/>
                 </mxCell>
                 <mxCell id="A-op" value="Operator" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" parent="1" vertex="1">
@@ -242,7 +242,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="B-new-nd-runs" id="seq-b-new-nd">
-        <mxGraphModel dx="1693" dy="1069" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1600" math="0" shadow="0">
+        <mxGraphModel dx="539" dy="413" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1600" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -442,11 +442,11 @@
         </mxGraphModel>
     </diagram>
     <diagram name="C-domain-dem-change" id="seq-c-domain-dem">
-        <mxGraphModel dx="1693" dy="1069" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
+        <mxGraphModel dx="539" dy="413" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="C-title" value="C. Domain / DEM change (rows 6, 8) — always rebuild, skip ND if exist" style="text;html=1;fontStyle=1;fontSize=16;align=left;verticalAlign=middle;strokeWidth=1.5;" parent="1" vertex="1">
+                <mxCell id="C-title" value="C. Domain / DEM change (rows 6) — always rebuild, skip ND if exist" style="text;html=1;fontStyle=1;fontSize=16;align=left;verticalAlign=middle;strokeWidth=1.5;" parent="1" vertex="1">
                     <mxGeometry x="70" y="10" width="700" height="24" as="geometry"/>
                 </mxCell>
                 <mxCell id="C-op" value="Operator" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;" parent="1" vertex="1">
@@ -693,7 +693,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="D-upstream-cascade" id="seq-d-upstream">
-        <mxGraphModel dx="1693" dy="1069" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="2000" math="0" shadow="0">
+        <mxGraphModel dx="539" dy="413" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="2000" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>

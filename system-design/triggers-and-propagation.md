@@ -31,8 +31,6 @@ Reach processing chain and DB schema in [`orchestrator-design.md`](orchestrator-
 | 4 | revision_bumped → solver updated | External update to `desired_state.solver` + revision bump | No | No | Yes | (cascade) | (cascade) |
 | 5 | revision_bumped → library_density updated | External update to library_density fields + revision bump | No | No | Yes | (cascade) | (cascade) |
 | 6 | revision_bumped → domain updated | External update to `desired_state.model_domain` + revision bump | No | Yes | Yes (if don't exist) | Yes | (cascade) |
-| 7 | hydrofabric_updated (revisit later) | System-wide; revision bumped for all affected reaches | Yes | Yes | (cascade) | (cascade) | (cascade) |
-| 8 | dem_snapshot_updated (revisit later) | System-wide; revision bumped for all affected reaches | No | Yes | Yes (if don't exist) | Yes | (cascade) |
 
 ### 1.2 Internal triggers (cascade)
 
@@ -47,11 +45,11 @@ Not revision bumps. Follow-on work after a reach finishes processing (see §2.1 
 
 Sequence diagram versions showing component interactions in [`trigger-sequence-diagrams.drawio`](trigger-sequence-diagrams.drawio).
 
-**A. Full chain (rows 2, 7)** — model invalidated, rebuild everything.
+**A. Full chain (row 2)** — model invalidated, rebuild everything.
 
 ```mermaid
 flowchart TD
-    T["override_id or hydrofabric changed"] --> Build["build_model (tooling)"]
+    T["override_id changed"] --> Build["build_model (tooling)"]
     Build --> ND["run_nd_scenarios (tooling)"]
     ND --> Plan["plan_scenarios"]
     Plan --> KWSE["run_kwse_scenarios (tooling)"]
@@ -68,11 +66,11 @@ flowchart TD
     KWSE --> Prop["cascade upstream"]
 ```
 
-**C. Domain / DEM change (rows 6, 8)** — always rebuild model (new domain = new path), skip ND if they already exist at the new model path.
+**C. Domain / DEM change (rows 6)** — always rebuild model (new domain = new path), skip ND if they already exist at the new model path.
 
 ```mermaid
 flowchart TD
-    T["domain or DEM changed"] --> Build["build_model (tooling)"]
+    T["domain changed"] --> Build["build_model (tooling)"]
     Build --> NDCheck{"ND runs exist<br/>at new model path?"}
     NDCheck -- "no" --> ND["run_nd_scenarios (tooling)"]
     ND --> Plan["plan_scenarios"]
