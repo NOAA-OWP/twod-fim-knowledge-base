@@ -7,7 +7,6 @@ This DR establish what should be range of upper and lower bounds for KWSEs.
 ## Alternatives
 
 ### ALT-A - Same as D/S Reach Max and Min STL WSEL Floored by Reach's Normal Depth WSEL at STL
-#current
 
 For every reach's every discharge we model it with full range of D/S Reach U/S WSEL range, but we don't model any KWSE that is lower than the reach's normal depth WSEL at the STL.
 
@@ -20,6 +19,17 @@ Build a joint recurrence-interval distribution describing the relationship betwe
 
 The drainage area ratio strongly governs these bounds: near 1:1 ratios produce a narrow conditioned range (upper and lower bounds nearly coincide with the same-RI downstream stage); intermediate ratios produce a progressively wider range; extreme ratios (small tributary into large mainstem) produce bounds anchored near baseflow at the low end and the full mainstem flood range at the high end. This approach would tighten the simulation envelope for correlated reaches while preserving the full range for uncorrelated ones. However, constructing a reliable joint distribution at CONUS scale introduces significant complexity and additional failure modes. Validation across diverse reach geometries and climates would be substantial.
 
+### ALT-C - Upper Bound Same as D/S Reach Max STL WSEL and Lower Bound Same as Reach's Normal Depth WSEL at STL
+#current
+
+In comparison to Alt-A, this makes more sense because for lower bound there could be two cases
+1. DS Reach Min WSEL is lower than ND WSEL 
+2. DS Reach Min WSEL is higher than ND WSEL
+
+For case 1, we were anyways going to floor by ND WSEL, so for case 1 ALT-C is same as ALT-A. Case 2 should be rare and but even if that happens the hydraulically correct target KWSE range should be from reach's nd WSEL to ds reach max KWSE. 
+
+The biggest benefit of this is that it simplifies coding and now the range is solely determined by only one dependency (max KWSE) from downstream reach.
 
 ## Decision History
 - 2026-06-01: ALT-A selected for simplicity and to reduce initial study effort and complexity.
+- 2026-06-17: ALT-C selected based on realization that ALT-A can be simplified to create ALT-C.
