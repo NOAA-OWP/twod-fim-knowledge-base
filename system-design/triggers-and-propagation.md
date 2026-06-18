@@ -11,7 +11,7 @@ Reach processing chain and DB schema in [`orchestrator-design.md`](orchestrator-
 
 ## Open design questions
 
-**Propagation algorithm.** Two complementary discovery mechanisms — (a) topology graph walk via `reach_network` table bounds candidate upstream reaches; (b) BC provenance lookup via `runs.transfer_bc_from_run_hash` confirms which candidates actually need re-running. See §2.1 step 5.
+**Propagation algorithm.** Two complementary discovery mechanisms — (a) topology graph walk via `reach_network` table bounds candidate upstream reaches; (b) BC provenance lookup via `runs.kwse_transfer_run_identity` confirms which candidates actually need re-running. See §2.1 step 5.
 
 **Trigger consolidation.** Simplified by the reconciliation loop — multiple changes between ticks coalesce into one gap computation. See §4.
 
@@ -123,7 +123,7 @@ flowchart TD
 | Mechanism | What it does | Why |
 |---|---|---|
 | **(a) Topology graph walk** | From R, look up immediate upstream neighbors (U₁, U₂, ...) in `reach_network` | Bounds the search — typically 1-3 neighbors per reach |
-| **(b) BC provenance lookup** | For each candidate U, check `runs.transfer_bc_from_run_hash`: does U reference R's prior output? | Avoids re-running U if its BC source was sampled from a different downstream version (still current) |
+| **(b) BC provenance lookup** | For each candidate U, check `runs.kwse_transfer_run_identity`: does U reference R's prior output? | Avoids re-running U if its BC source was sampled from a different downstream version (still current) |
 
 If U references R's now-superseded output, the orchestrator processes U directly (same scope as R's trigger). When U completes, the same logic fires for U's upstream neighbors. Recursion terminates at headwaters or when a candidate's run already points at the new downstream output. If the orchestrator crashes mid-cascade, periodic S3 rescan detects completed artifacts and syncs `current_state`.
 

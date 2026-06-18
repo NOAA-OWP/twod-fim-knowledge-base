@@ -208,7 +208,7 @@
                         <mxPoint x="255" y="1526" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="A-m31" value="check runs.transfer_bc_from_run_hash" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                <mxCell id="A-m31" value="check runs.kwse_transfer_run_identity" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="505" y="1574" as="sourcePoint"/>
                         <mxPoint x="255" y="1574" as="targetPoint"/>
@@ -411,7 +411,7 @@
                         <mxPoint x="255" y="1238" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="B-m25" value="check runs.transfer_bc_from_run_hash" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                <mxCell id="B-m25" value="check runs.kwse_transfer_run_identity" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="505" y="1286" as="sourcePoint"/>
                         <mxPoint x="255" y="1286" as="targetPoint"/>
@@ -659,7 +659,7 @@
                         <mxPoint x="255" y="1632" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="C-m32" value="check runs.transfer_bc_from_run_hash" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
+                <mxCell id="C-m32" value="check runs.kwse_transfer_run_identity" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;strokeWidth=1.5;" parent="1" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="505" y="1680" as="sourcePoint"/>
                         <mxPoint x="255" y="1680" as="targetPoint"/>
@@ -730,7 +730,7 @@
                         <mxPoint x="145" y="170" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="D-m2" value="check runs.transfer_bc_from_run_hash for each candidate" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
+                <mxCell id="D-m2" value="check runs.kwse_transfer_run_identity for each candidate" style="html=1;verticalAlign=bottom;startArrow=none;endArrow=block;rounded=0;fontSize=10;strokeWidth=1.5;" parent="1" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="395" y="218" as="sourcePoint"/>
                         <mxPoint x="145" y="218" as="targetPoint"/>
