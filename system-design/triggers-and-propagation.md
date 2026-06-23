@@ -66,7 +66,7 @@ flowchart TD
     KWSE --> Prop["cascade upstream"]
 ```
 
-**C. Domain / DEM change (rows 6)** — always rebuild model (new domain = new path), skip ND if they already exist at the new model path.
+**C. Domain change (row 6)** — always rebuild model (new domain = new path), skip ND if they already exist at the new model path.
 
 ```mermaid
 flowchart TD
