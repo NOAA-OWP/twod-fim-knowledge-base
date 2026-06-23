@@ -26,7 +26,7 @@ In comparison to Alt-A, this makes more sense because for lower bound there coul
 1. DS Reach Min WSEL is lower than ND WSEL 
 2. DS Reach Min WSEL is higher than ND WSEL
 
-For case 1, we were anyways going to floor by ND WSEL, so for case 1 ALT-C is same as ALT-A. Case 2 should be rare and but even if that happens the hydraulically correct target KWSE range should be from reach's nd WSEL to ds reach max KWSE. 
+For case 1, we were always going to floor by ND WSEL, so for case 1 ALT-C is same as ALT-A. For case 2, using the ND value will lead to a larger (and therefore more conservative) set of bounds.
 
 The biggest benefit of this is that it simplifies coding and now the range is solely determined by only one dependency (max KWSE) from downstream reach.
 

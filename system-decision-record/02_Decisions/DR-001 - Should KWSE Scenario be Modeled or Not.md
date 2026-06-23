@@ -3,6 +3,14 @@ Define whether KWSE scenarios should be modeled for all reaches or only selected
 
 This decision establishes whether downstream-stage-aware scenarios are always represented in the library rather than treated as optional special cases.
 
+### From Literature
+[https://www.fema.gov/sites/default/files/2020-02/Hydraulics_OneDimensionalAnalyses_Nov_2016.pdf](https://www.fema.gov/sites/default/files/2020-02/Hydraulics_OneDimensionalAnalyses_Nov_2016.pdf)  
+_"Absent established downstream elevations or a control cross section, the Mapping Partner  
+should compute starting water-surface elevations using normal depth calculations (or slope  
+area) at a cross section sufficiently distant downstream from the downstream limit of study so as  
+to render the effects of uncertainties in the starting water-surface elevation negligible."_
+
+
 ### Supplementary Analysis: Backwater Sensitivity from Ripple1D Rating Curves
 
 **Hypothesis:** For some reaches, varying the downstream stage has no measurable effect on upstream water surface elevation for a given discharge. For those reaches, modeling multiple downstream conditions per discharge wastes compute.
