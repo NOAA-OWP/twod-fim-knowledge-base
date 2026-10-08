@@ -111,7 +111,7 @@ It's worth noting that LISFLOOD-FP provides functionality to terminate runs when
 
 Reference in the LISFLOOD-FP user manual:
 
-![[DR-022-FIG-001.png|697]]
+![[DR-022 - FIG-001.png|697]]
 
 ### ALT-H - Inundated Area Change (m2/s)
 

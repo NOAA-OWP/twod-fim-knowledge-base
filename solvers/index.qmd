@@ -1,0 +1,163 @@
+---
+title: "LISFLOOD-FP and SFINCS"
+subtitle: "2D Hydraulic Model Technical Comparison"
+author: "Scott Lawson"
+date: "2026-08-11"
+format:
+  revealjs:
+    theme: default
+    slide-number: true
+    toc: false
+    toc-depth: 1
+    toc-title: "Outline"
+    code-block-bg: true
+    smaller: true
+    scrollable: true
+---
+
+## Summary
+
+- Evaluated **LISFLOOD-FP** and **SFINCS** as candidate 2D solvers for automated, reach-based FIM
+- **Both models meet all project requirements**
+- Automation code implemented for each, driven from a common internal data model
+- Most differences between the two are configuration semantics
+- A smaller set of differences are fundamental and conceptual, with no direct equivalent in the other model:
+  - How the active domain is defined and boundary roles are assigned
+  - How spatial inputs are stored and indexed
+  - Where boundary conditions can be placed
+
+# LISFLOOD-FP
+
+## Core Files
+
+| File | Format | Description |
+|---|---|---|
+| `<run_id>.par` | ASCII key-value | Main configuration |
+| `<run_id>.bci` | ASCII | Boundary condition locations and types |
+| `<DEMfile>` | ARC ASCII raster | Terrain |
+| `<manningfile>` | ARC ASCII raster | Manning's n |
+| `<startfile>` | ARC ASCII raster | Hot-start water depth (optional) |
+
+## File Formats
+
+- Spatial inputs are **ARC ASCII rasters** referenced by path in `.par`
+- Configuration and BC files use plain **ASCII key-value** or tabular formats
+- NetCDF output is available but was not evaluated — worth investigating for GIS integration and post-processing
+
+## Boundary Conditions — Normal Depth
+
+- `FREE` applies a **normal depth (uniform flow)** condition at edge cells
+- Applies **only to edge cells** — cannot be placed in the domain interior
+- One-way: water cannot re-enter through a `FREE` cell
+- Physics: Manning's equation flux using **local simulated water depth** at each timestep
+- Parameterized by a constant friction slope per cardinal direction (`N`, `S`, `E`, `W`)
+
+
+## Boundary Conditions — Inflow
+
+Inflow is specified as point sources in the `.bci` file:
+
+```
+P  x  y  QFIX  value
+```
+
+- `value` is discharge per unit width (**m²/s**); LISFLOOD multiplies by cell width internally
+- Can be placed on **any cell** in the domain, not just edge cells
+- Time-varying inflow (`QVAR` + `.bdy`) is supported but not currently used
+
+## Boundary Conditions — Known WSE
+
+- `HFIX` — constant prescribed WSE on any grid cell
+- `HVAR` — time-varying WSE paired with a `.bdy` file
+- We use `HFIX` for all stage transfer boundaries, with WSE taken from downstream model results
+
+## Build and Deployment
+
+- Must be **compiled from source**
+- Fork maintained at [github.com/Dewberry/lisflood-fp](https://github.com/Dewberry/lisflood-fp) — includes all project patches
+- Docker container wrapping the compiled binary used for cloud execution
+- GPU acceleration available for acceleration, FV1, and DG2 solvers (requires CUDA compilation)
+
+| Image | Size |
+|---|---|
+| CPU | 1.1 GB |
+| GPU | 3.5 GB |
+
+# SFINCS
+
+## Core Files
+
+| File | Format | Description |
+|---|---|---|
+| `sfincs.inp` | ASCII key=value | Main configuration |
+| `sfincs.msk` | Binary uint8 | Cell activity mask |
+| `sfincs.ind` | Binary uint32 | Active cell index (binary mode) |
+| `sfincs.dep` | Binary float32 | Terrain (active cells only) |
+| `sfincs.man` | Binary float32 | Manning's n (active cells only) |
+| `sfincs.src` / `sfincs.dis` | ASCII | Inflow points / discharge time series |
+| `sfincs.bnd` / `sfincs.bzs` | ASCII | WL boundary coordinates / time series |
+| `sfincs.bdr` | ASCII | Normal depth BC definition |
+
+## File Formats
+
+- Spatial inputs can be **binary or ASCII**; binary (`inputformat = bin`) strongly preferred for production
+- Binary stores only active cells in **Fortran column-major order** — smaller files, faster reads
+- NetCDF input supported from v2024.01 — strong candidate for future adoption; would provide CF-compliant inputs with embedded CRS metadata and eliminate the index file
+
+::: {.callout-warning}
+SFINCS NetCDF **outputs are currently bugged** — post-processing is required to convert model results to usable GeoTIFFs before any downstream analysis or delivery.
+:::
+
+## The Mask File
+
+SFINCS classifies every grid cell **before the simulation begins** via `sfincs.msk` — there is no direct equivalent in LISFLOOD-FP.
+
+- Defines the **active domain** and **assigns boundary roles** simultaneously
+- All spatial inputs store values only for cells where `msk > 0`
+
+![Fig. 14 — SFINCS mask value layout (sfincs.readthedocs.io)](https://sfincs.readthedocs.io/en/latest/_images/SFINCS_mask_grid.PNG){width=80% fig-align="center"}
+
+## Boundary Conditions — Normal Depth
+
+Defined in `sfincs.bdr` as a thalweg line with a slope value (`xb yb xi yi slope d`). SFINCS fits a water surface to the line and enforces the resulting WSE at all mask=5 cells:
+
+$$z_s = z_i - d \times \text{slope}$$
+
+- Can be assigned to **any grid cell**, not just edge cells
+- `d = -1` → auto straight-line distance; positive `d` → manual along-channel distance (preferred for sinuous reaches)
+
+## Boundary Conditions — Inflow
+
+- Each cell intersecting the inflow line → one source point in `sfincs.src` with its own discharge column in `sfincs.dis`
+- Discharge in **m³/s per cell**
+- Can be placed on **any cell** in the domain, not just edge cells
+
+## Boundary Conditions — Known WSE
+
+- Cells designated **mask=2**; coordinates in `sfincs.bnd`, values in `sfincs.bzs`
+- Can be assigned to **any grid cell**
+- Values can be specified at coarser resolution than the grid — SFINCS interpolates to individual boundary cells using **IDW**
+
+
+## Build and Deployment
+
+- **Pre-built Docker images** on DockerHub (CPU + GPU) — no compilation required
+- GPU acceleration results on `aws g4dn.xlarge`:
+
+| Mode | Size | Runtime |
+|---|---|---|
+| CPU | 507 MB | ~383 s |
+| GPU | 2.8 GB | ~28 s (~14×) |
+
+# Conclusion
+
+## Both Models Are Approved
+
+- Both approved for production use in the automated reach-based FIM pipeline
+- Each satisfies all core requirements:
+  - Structured grid inputs and outputs
+  - GPU acceleration
+  - Linux-native, container-based deployment
+  - Inflow, stage transfer (known WSE), and normal depth outflow BCs
+- A technical report with full implementation details, parameter tables, and gotchas is available as a PDF
+

@@ -1,4 +1,4 @@
-#terminal-reaches
+#terminal-reaches #network-modification 
 ## Description
 Define how the reach network is modified where it crosses lakes during the network modification phase. The goal is to stop modeling reach hydraulics inside a level pool while preserving inflow/outflow connectivity for the library + mosaic.
 

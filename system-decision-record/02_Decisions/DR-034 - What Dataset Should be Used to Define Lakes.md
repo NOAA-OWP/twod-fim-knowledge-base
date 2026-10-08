@@ -1,3 +1,4 @@
+#netowrk-modification
 ## Description
 The network modification at lakes (see [[DR-007 - How to Modify the Reach Network at Lakes]]) needs a polygon dataset that delineates the lake area used to remove/trim reaches, the `dead pool polygon`. This decision is about where that dataset comes from.
 
@@ -23,3 +24,7 @@ Judged a significant undertaking: it requires an initial seed list, a delineatio
 
 ## Decision History
 - 2026-05-28: Drafted from meeting notes. ALT-A favored; ALT-B set aside as a significant undertaking.
+
+
+## Raw Dump for Future
+![[DR-034 - FIG-001.png]]

@@ -43,15 +43,20 @@ ds_space = ds_scenarios[::ds_interval]
 ### ALT-B - Snap to a Per-Reach Standard Stage Grid
 #current
 
-Each reach picks a stage increment `Δz` from the discrete menu `{0.25, 0.5, 1, 2}` m. The library grid for that reach is built by stepping up from the per-discharge lower bound (from [[DR-032 - What Should be the Lower and Upper KWSE Bound for Each Reach for Each Discharge]]) rounded up to nearest `Δz` in increments of `Δz`, until the upper bound.
+Each reach picks a stage increment `Δz` from the discrete menu `{0.25, 0.5, 1, 2, 5}` m. The library grid for that reach is built by stepping up from the per-discharge lower bound (from [[DR-032 - What Should be the Lower and Upper KWSE Bound for Each Reach for Each Discharge]]) rounded  to the nearest `Δz` in increments of `Δz`, until the upper bound rounded to the nearest `Δz` .
 
-Examples for d/s WSEL range `224 → 227.1`:
-- `Δz = 0.25` → `224, 224.25, 224.5, …, 226.5, 226.75, 227`
+Examples for d/s WSEL range `224.2 → 227.1`:
+- `Δz = 0.25` → `224.25, 224.5, …, 226.5, 226.75, 227`
 - `Δz = 1` → `224, 225, 226, 227`
 - `Δz = 2` → `224, 226, 228`
 
-Each grid stage is bound to the downstream simulation whose nominal stage is nearest, provided it is within `Δz/2`; that run's WSE raster is imposed on the STL (see [[DR-031 - Should Downstream Stage be Uniform or Cell-Specific Along the STL]]). Targets with no downstream run inside `Δz/2` are skipped as gaps in the downstream reach's own sampling.
+Each grid stage is bound to the downstream simulation whose nominal stage is nearest, provided it is within `Δz/2`; that run's WSE raster is imposed on the STL (see [[DR-031 - Should Downstream Stage be Uniform or Cell-Specific Along the STL]]). Targets with no downstream run inside `Δz/2` are skipped as gaps in the downstream reach's own sampling. **The central idea is to have a run available within `Δz`**
 
+The core principle for grid here is that staying on grid simplify things for all processes. It increase human understandability. The grid is anchored to 0, in Ripple1D before 0.11.0, we had it start from nearest 0/0.5 and then go from there which was unnecessarily complicated. So for example a `Δz = 1` can still land on  `585.5, 586.5, …`; this absolute rule puts it on `585, 586, …` giving global consistency.
+
+
+All of above concepts plus ALT D of [[DR-032 - What Should be the Lower and Upper KWSE Bound for Each Reach for Each Discharge]] are shown here. Orange here is the d/s reach min wsel for each discharge curve
+![[DR-033 - FIG-002.png]]
 ### ALT-C - Scenarios Selected Based on Joint Frequency Analysis
 
 Build a joint recurrence-interval distribution describing the relationship between upstream discharge and downstream water surface elevation for each reach pair. For each pair, either construct an empirical distribution directly from retrospective data or fit a parametric distribution whose parameters are predicted as functions of drainage area ratio. Sample downstream scenarios with density proportional to probability, concentrating fidelity in high-probability regions while still covering the full physically possible domain.
